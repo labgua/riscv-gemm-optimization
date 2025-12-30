@@ -1,0 +1,17 @@
+{
+    "configurations": [
+        {
+            "name": "RISC-V",
+            "includePath": [
+                "${workspaceFolder}/**",
+                "/home/sergio/UniSpec/HPC/PROGETTO/riscv64-elf-gcc/lib/gcc/riscv64-unknown-elf/14.2.0/include"
+            ],
+            "defines": [],
+            "compilerPath": "/home/sergio/UniSpec/HPC/PROGETTO/riscv64-elf-gcc/bin/riscv64-unknown-elf-gcc",
+            "cStandard": "c11",
+            "cppStandard": "c++17",
+            "intelliSenseMode": "gcc-arm"
+        }
+    ],
+    "version": 4
+}
