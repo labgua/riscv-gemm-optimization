@@ -93,6 +93,14 @@ rvv2_smatmul_recursive_O3: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	./builder.sh riscv64_emu -O3 -o build/qemu/rvv2_smatmul_recursive_O3 rvv2_smatmul_recursive.c -fopenmp $(UTILS_O_QEMU) $(RISCV_OPT)
 	./builder.sh riscv64 -O3 -o build/riscv64/rvv2_smatmul_recursive_O3 rvv2_smatmul_recursive.c -fopenmp $(UTILS_O_RISCV) $(RISCV_OPT)
 
+
+## NEW VERSIONS
+rvv_smatmulop_reordered_tiling: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh riscv64_emu -O3 -o build/qemu/rvv_smatmulop_reordered_tiling rvv_smatmulop_reordered_tiling.c $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O3 -o build/riscv64/rvv_smatmulop_reordered_tiling rvv_smatmulop_reordered_tiling.c $(UTILS_O_RISCV) $(RISCV_OPT)
+
+
+
 #smatmul_pfor:
 #smatmul_tiling:
 #smatmul_tiling_v2:
