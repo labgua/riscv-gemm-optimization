@@ -95,12 +95,12 @@ rvv2_smatmul_recursive_O3: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 
 
 ## NEW VERSIONS
-smatmul_f32_baseline:
+smatmul_f32_baseline: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	./builder.sh x86_64 -O0 -o build/x86_64/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_X86)
 	./builder.sh riscv64_emu -O0 -o build/qemu/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_QEMU) $(RISCV_OPT)
 	./builder.sh riscv64 -O0 -o build/riscv64/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
-smatmulop_f32_baseline:
+smatmulop_f32_baseline: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	./builder.sh x86_64 -O0 -o build/x86_64/smatmulop_f32_baseline smatmulop_f32_baseline.c $(UTILS_O_X86)
 	./builder.sh riscv64_emu -O0 -o build/qemu/smatmulop_f32_baseline smatmulop_f32_baseline.c $(UTILS_O_QEMU) $(RISCV_OPT)
 	./builder.sh riscv64 -O0 -o build/riscv64/smatmulop_f32_baseline smatmulop_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT)
