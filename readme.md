@@ -1,5 +1,5 @@
 
-# 🚀 Matrix Multiplication Optimization on RISC-V Architecture
+# 🚀 Matrix Multiplication Optimization on RISC-V Architecture (UPDATE)
 
 This repository contains optimized implementations of matrix multiplication algorithms targeting RISC-V platforms of Banana Pi Board. The project demonstrates the impact of algorithmic and compiler-level optimizations on performance, including techniques like **loop interchange**, **recursive divide-and-conquer**, **tiling**, **OpenMP parallelization**, and **auto-vectorization** using Scalar and **RISC-V Vector Extension (RVV)**.
 
