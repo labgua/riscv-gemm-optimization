@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <omp.h>
-
-#define IFDEBUG if(DEBUG_FLAG)
+#include "utils.h"
 
 #define DEBUG_FLAG 0
 #define SIZE 64
@@ -46,29 +45,6 @@ void multiply(double* mat1, double* mat2, double* res, int size, int ts) {
     }
 
 
-}
-
-void print_matrix(double* M, int size){
-    printf("> Print Matrix:\n");
-    for (int i = 0; i < size; i++) {
-        for (int j = 0; j < size; j++) {
-            printf("%.1f ", M[i * size + j]);
-        }
-        printf("\n");
-    }
-
-    printf(">inline: ");
-    printf("{");
-    for (int i = 0; i < size; i++) {
-        printf("{");
-        for (int j = 0; j < size; j++) {
-            printf("%.1f ", M[i * size + j]);
-            if( j != size - 1 ) printf(", ");
-        }
-        printf("}");
-        if( i != size - 1 ) printf(", ");
-    }
-    printf("}\n\n");
 }
 
 int main(int argc, char* argv[]) {

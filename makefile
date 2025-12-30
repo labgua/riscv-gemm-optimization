@@ -1,4 +1,4 @@
-# COMPILATION SUITE V2
+# COMPILATION SUITE V3
 #
 # DON'T CHANGE THIS FILE
 # this file takes only order in compilation  
@@ -23,6 +23,7 @@ TARGETS = smatmul_baseline \
           rvv2_smatmul_recursive \
           rvv_smatmul_recursive_O3 \
           rvv2_smatmul_recursive_O3 \
+		  rvv_smatmulop_reordered_tiling \
 
 # Shared objects paths
 UTILS_O_X86    = build/x86_64/utils.o
@@ -48,42 +49,49 @@ $(UTILS_O_RISCV):
 utils: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 
 
+
 # compile with -O0
-smatmul_baseline:
-	./builder.sh x86_64 -O0 -o build/x86_64/smatmul_baseline smatmul_baseline.c
-	./builder.sh riscv64_emu -O0 -o build/qemu/smatmul_baseline smatmul_baseline.c $(RISCV_OPT)
-	./builder.sh riscv64 -O0 -o build/riscv64/smatmul_baseline smatmul_baseline.c $(RISCV_OPT)
+smatmul_baseline: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh x86_64 -O0 -o build/x86_64/smatmul_baseline smatmul_baseline.c $(UTILS_O_X86)
+	./builder.sh riscv64_emu -O0 -o build/qemu/smatmul_baseline smatmul_baseline.c $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O0 -o build/riscv64/smatmul_baseline smatmul_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
-smatmul_loopinterchange_O0:
-	./builder.sh x86_64 -O0 -o build/x86_64/smatmul_loopinterchange_O0 smatmul_loopinterchange.c
-	./builder.sh riscv64_emu -O0 -o build/qemu/smatmul_loopinterchange_O0 smatmul_loopinterchange.c $(RISCV_OPT)
-	./builder.sh riscv64 -O0 -o build/riscv64/smatmul_loopinterchange_O0 smatmul_loopinterchange.c $(RISCV_OPT)
+smatmul_loopinterchange_O0: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh x86_64 -O0 -o build/x86_64/smatmul_loopinterchange_O0 smatmul_loopinterchange.c $(UTILS_O_X86)
+	./builder.sh riscv64_emu -O0 -o build/qemu/smatmul_loopinterchange_O0 smatmul_loopinterchange.c $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O0 -o build/riscv64/smatmul_loopinterchange_O0 smatmul_loopinterchange.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
-smatmul_loopinterchange_O1:
-	./builder.sh x86_64 -O1 -o build/x86_64/smatmul_loopinterchange_O1 smatmul_loopinterchange.c
-	./builder.sh riscv64_emu -O1 -o build/qemu/smatmul_loopinterchange_O1 smatmul_loopinterchange.c $(RISCV_OPT)
-	./builder.sh riscv64 -O1 -o build/riscv64/smatmul_loopinterchange_O1 smatmul_loopinterchange.c $(RISCV_OPT)
+smatmul_loopinterchange_O1: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh x86_64 -O1 -o build/x86_64/smatmul_loopinterchange_O1 smatmul_loopinterchange.c $(UTILS_O_X86)
+	./builder.sh riscv64_emu -O1 -o build/qemu/smatmul_loopinterchange_O1 smatmul_loopinterchange.c $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O1 -o build/riscv64/smatmul_loopinterchange_O1 smatmul_loopinterchange.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
-smatmul_loopinterchange_O2:
-	./builder.sh x86_64 -O2 -o build/x86_64/smatmul_loopinterchange_O2 smatmul_loopinterchange.c
-	./builder.sh riscv64_emu -O2 -o build/qemu/smatmul_loopinterchange_O2 smatmul_loopinterchange.c $(RISCV_OPT)
-	./builder.sh riscv64 -O2 -o build/riscv64/smatmul_loopinterchange_O2 smatmul_loopinterchange.c $(RISCV_OPT)
+smatmul_loopinterchange_O2: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh x86_64 -O2 -o build/x86_64/smatmul_loopinterchange_O2 smatmul_loopinterchange.c $(UTILS_O_X86)
+	./builder.sh riscv64_emu -O2 -o build/qemu/smatmul_loopinterchange_O2 smatmul_loopinterchange.c $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O2 -o build/riscv64/smatmul_loopinterchange_O2 smatmul_loopinterchange.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
-smatmul_loopinterchange_O3:
-	./builder.sh x86_64 -O3 -o build/x86_64/smatmul_loopinterchange_O3 smatmul_loopinterchange.c
-	./builder.sh riscv64_emu -O3 -o build/qemu/smatmul_loopinterchange_O3 smatmul_loopinterchange.c $(RISCV_OPT)
-	./builder.sh riscv64 -O3 -o build/riscv64/smatmul_loopinterchange_O3 smatmul_loopinterchange.c $(RISCV_OPT)
+smatmul_loopinterchange_O3: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh x86_64 -O3 -o build/x86_64/smatmul_loopinterchange_O3 smatmul_loopinterchange.c $(UTILS_O_X86)
+	./builder.sh riscv64_emu -O3 -o build/qemu/smatmul_loopinterchange_O3 smatmul_loopinterchange.c $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O3 -o build/riscv64/smatmul_loopinterchange_O3 smatmul_loopinterchange.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
+# these only possible for risc-v ...
+rvv_smatmul_recursive: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh riscv64_emu -O2 -o build/qemu/rvv_smatmul_recursive rvv_smatmul_recursive.c -fopenmp $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O2 -o build/riscv64/rvv_smatmul_recursive rvv_smatmul_recursive.c -fopenmp $(UTILS_O_RISCV) $(RISCV_OPT)
 
-rvv_smatmul_recursive_O3:
-	./builder.sh x86_64 -O3 -o build/x86_64/rvv_smatmul_recursive_O3 rvv_smatmul_recursive.c -fopenmp
-	./builder.sh riscv64_emu -O3 -o build/qemu/rvv_smatmul_recursive_O3 rvv_smatmul_recursive.c -fopenmp $(RISCV_OPT)
-	./builder.sh riscv64 -O3 -o build/riscv64/rvv_smatmul_recursive_O3 rvv_smatmul_recursive.c -fopenmp $(RISCV_OPT)
+rvv2_smatmul_recursive: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh riscv64_emu -O2 -o build/qemu/rvv2_smatmul_recursive rvv2_smatmul_recursive.c -fopenmp $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O2 -o build/riscv64/rvv2_smatmul_recursive rvv2_smatmul_recursive.c -fopenmp $(UTILS_O_RISCV) $(RISCV_OPT)
 
-rvv2_smatmul_recursive_O3:
-	./builder.sh x86_64 -O3 -o build/x86_64/rvv2_smatmul_recursive_O3 rvv2_smatmul_recursive.c -fopenmp
-	./builder.sh riscv64_emu -O3 -o build/qemu/rvv2_smatmul_recursive_O3 rvv2_smatmul_recursive.c -fopenmp $(RISCV_OPT)
-	./builder.sh riscv64 -O3 -o build/riscv64/rvv2_smatmul_recursive_O3 rvv2_smatmul_recursive.c -fopenmp $(RISCV_OPT)
+rvv_smatmul_recursive_O3: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh riscv64_emu -O3 -o build/qemu/rvv_smatmul_recursive_O3 rvv_smatmul_recursive.c -fopenmp $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O3 -o build/riscv64/rvv_smatmul_recursive_O3 rvv_smatmul_recursive.c -fopenmp $(UTILS_O_RISCV) $(RISCV_OPT)
+
+rvv2_smatmul_recursive_O3: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh riscv64_emu -O3 -o build/qemu/rvv2_smatmul_recursive_O3 rvv2_smatmul_recursive.c -fopenmp $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O3 -o build/riscv64/rvv2_smatmul_recursive_O3 rvv2_smatmul_recursive.c -fopenmp $(UTILS_O_RISCV) $(RISCV_OPT)
 
 #smatmul_pfor:
 #smatmul_tiling:
@@ -91,13 +99,12 @@ rvv2_smatmul_recursive_O3:
 #smatmul_tiling_v3:
 #smatmul_tiling_v4:
 #smatmul_recursive:
-#rvv_smatmul_recursive:
-#rvv2_smatmul_recursive:
+# ...
 # compile target with -O2 (because the best is -O2 in this case, vectorization will do apart, not with -O3)
-%: %.c
-	./builder.sh x86_64 -O2 -o build/x86_64/$@ $< -fopenmp
-	./builder.sh riscv64_emu -O2 -o build/qemu/$@ $< -fopenmp $(RISCV_OPT)
-	./builder.sh riscv64 -O2 -o build/riscv64/$@ $< -fopenmp $(RISCV_OPT)
+%: %.c $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh x86_64 -O2 -o build/x86_64/$@ $< -fopenmp $(UTILS_O_X86)
+	./builder.sh riscv64_emu -O2 -o build/qemu/$@ $< -fopenmp $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O2 -o build/riscv64/$@ $< -fopenmp $(UTILS_O_RISCV) $(RISCV_OPT)
 
 clean:
 	rm -f build/x86_64/*

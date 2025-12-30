@@ -3,7 +3,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <omp.h>
+#include "utils.h"
 
+#define DEBUG_FLAG 0
 #define DEFAULT_THRESHOLD 64 
 
 // Recursive matrix multiplication:
@@ -134,9 +136,18 @@ int main(int argc, char* argv[]) {
 
     zero_matrix(C, size);
 
+    IFDEBUG{
+        print_matrix(A, size);
+        print_matrix(B, size);
+    }
+
     double start_time = omp_get_wtime();
     recursive_multiply(A, B, C, size, size, threshold);
     double end_time = omp_get_wtime();
+
+    IFDEBUG{
+        print_matrix(C, size);
+    }
 
     printf("  <name_version, time[sec], size, threshold>\n");
     printf("> BENCHMARK_RECORD : smatmul_recursive %f, %d, %d\n", end_time - start_time, size, threshold);

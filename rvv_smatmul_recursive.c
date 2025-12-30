@@ -4,6 +4,9 @@
 #include <string.h>
 #include <riscv_vector.h>
 #include <omp.h>
+#include "utils.h"
+
+#define DEBUG_FLAG 0
 
 #define DEFAULT_THRESHOLD 64 
 
@@ -47,8 +50,11 @@ void recursive_multiply(double* A, double* B, double* C, int size, int stride, i
                     vfloat64m1_t c_vec = __riscv_vle64_v_f64m1(&C[i * stride + j], vl);  //HERE stride, not size (but is right??)
 
                     // Multiply and accumulate
+                    // TODO ???? FMA, tutto insiemeee!!! :(
+                    // c_vec = __riscv_vfmacc_vv_f64m1(c_vec, a_vec, b_vec, vl);
                     vfloat64m1_t prod = __riscv_vfmul_vv_f64m1(a_vec, b_vec, vl);
                     c_vec = __riscv_vfadd_vv_f64m1(c_vec, prod, vl);
+                    
 
                     // Store back to C
                     __riscv_vse64_v_f64m1(&C[i * stride + j], c_vec, vl);                //HERE stride, not size (but is right??)
@@ -165,9 +171,18 @@ int main(int argc, char* argv[]) {
 
     zero_matrix(C, size);
 
+    IFDEBUG{
+        print_matrix(A, size);
+        print_matrix(B, size);
+    }
+
     double start_time = omp_get_wtime();
     recursive_multiply(A, B, C, size, size, threshold);
     double end_time = omp_get_wtime();
+
+    IFDEBUG{
+        print_matrix(C, size);
+    }
 
     printf("  <name_version, time[sec], size, threshold>\n");
     printf("> BENCHMARK_RECORD : rvv_smatmul_recursive %f, %d, %d\n", end_time - start_time, size, threshold);
