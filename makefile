@@ -24,7 +24,29 @@ TARGETS = smatmul_baseline \
           rvv_smatmul_recursive_O3 \
           rvv2_smatmul_recursive_O3 \
 
+# Shared objects paths
+UTILS_O_X86    = build/x86_64/utils.o
+UTILS_O_QEMU   = build/qemu/utils.o
+UTILS_O_RISCV  = build/riscv64/utils.o
+
 all: $(TARGETS)
+
+# Compile utils.o foreach arch
+$(UTILS_O_X86):
+	@mkdir -p $(dir $@)
+	./builder.sh x86_64 -c -o $@ utils.c
+
+$(UTILS_O_QEMU):
+	@mkdir -p $(dir $@)
+	./builder.sh riscv64_emu -c -o $@ utils.c $(RISCV_OPT)
+
+$(UTILS_O_RISCV):
+	@mkdir -p $(dir $@)
+	./builder.sh riscv64 -c -o $@ utils.c $(RISCV_OPT)
+
+# Explicit rule: make utils.o for all arch
+utils: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+
 
 # compile with -O0
 smatmul_baseline:
