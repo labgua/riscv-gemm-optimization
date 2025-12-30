@@ -27,7 +27,7 @@ void print_matrix(double* M, int size){
 
 void print_matrixf32(float* M, int tile_size, int size, int print_inline){
     printf("> Print Matrix f32:\n");
-    for (int i = 0; i < tile_size; i++) {
+    for (int i = 0; i < size; i++) {
         for (int j = 0; j < tile_size; j++) {
             printf("%.1f\t", M[i * size + j]);
         }
@@ -37,7 +37,7 @@ void print_matrixf32(float* M, int tile_size, int size, int print_inline){
     if( print_inline == 1 ){
         printf(">inline: ");
         printf("{");
-        for (int i = 0; i < tile_size; i++) {
+        for (int i = 0; i < size; i++) {
             printf("{");
             for (int j = 0; j < tile_size; j++) {
                 printf("%.1f ", M[i * size + j]);
