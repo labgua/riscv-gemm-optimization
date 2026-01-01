@@ -800,7 +800,7 @@ int main(int argc, char* argv[]) {
     printf("Execution time: %f seconds\n", execution_time);
 
     // line to grep results in benchmark phase
-    printf("> BENCHMARK_RECORD : rvv_smatmulop_reordered_tiling, %f, %d, %d\n", execution_time, size, tile_size);
+    printf("> BENCHMARK_RECORD : rvv_smatmulop_f32_reordered_tiling, %f, %d, %d\n", execution_time, size, tile_size);
 
     // Free memory
     free(A);
