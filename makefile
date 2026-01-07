@@ -113,8 +113,8 @@ rvv_smatmulop_f32_reordered_tiling: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RIS
 	./builder.sh riscv64_emu -O3 -o build/qemu/rvv_smatmulop_f32_reordered_tiling rvv_smatmulop_f32_reordered_tiling.c $(UTILS_O_QEMU) $(RISCV_OPT)
 	./builder.sh riscv64 -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling rvv_smatmulop_f32_reordered_tiling.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
-	./builder.sh riscv64_emu -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling-parallel rvv_smatmulop_f32_reordered_tiling-parallel.c -fopenmp $(UTILS_O_QEMU) $(RISCV_OPT)
-	./builder.sh riscv64 -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling-parallel rvv_smatmulop_f32_reordered_tiling-parallel.c -fopenmp $(UTILS_O_RISCV) $(RISCV_OPT)
+	./builder.sh riscv64_emu -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_parallel rvv_smatmulop_f32_reordered_tiling-parallel.c -fopenmp $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_parallel rvv_smatmulop_f32_reordered_tiling-parallel.c -fopenmp $(UTILS_O_RISCV) $(RISCV_OPT)
 
 
 #smatmul_pfor:
