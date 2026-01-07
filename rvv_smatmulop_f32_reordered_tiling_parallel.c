@@ -794,7 +794,7 @@ int main(int argc, char* argv[]) {
     //clock_t start_time = clock();
 
     // Perform matrix multiplication (GEMM)
-    multiply_gemm(A, B, C, size, tile_size;
+    multiply_gemm(A, B, C, size, tile_size);
 
     // Stop timer
     double end_time = omp_get_wtime();
