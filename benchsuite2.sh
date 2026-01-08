@@ -22,35 +22,30 @@ echo "rvv_smatmulop_f32_tiling (with selection kernel on 256)" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 256 2 | grep "BENCHMARK_RECORD" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 256 4 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 256 8 | grep "BENCHMARK_RECORD">> $FILE
-./build/riscv64/rvv_smatmulop_f32_tiling 256 16 | grep "BENCHMARK_RECORD">> $FILE
 
 echo "rvv_smatmulop_f32_tiling (with selection kernel on 512)"
 echo "rvv_smatmulop_f32_tiling (with selection kernel on 512)" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 512 2 | grep "BENCHMARK_RECORD" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 512 4 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 512 8 | grep "BENCHMARK_RECORD">> $FILE
-./build/riscv64/rvv_smatmulop_f32_tiling 512 16 | grep "BENCHMARK_RECORD">> $FILE
 
 echo "rvv_smatmulop_f32_tiling (with selection kernel on 1024)"
 echo "rvv_smatmulop_f32_tiling (with selection kernel on 1024)" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 1024 2 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 1024 4 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 1024 8 | grep "BENCHMARK_RECORD">> $FILE
-./build/riscv64/rvv_smatmulop_f32_tiling 1024 16 | grep "BENCHMARK_RECORD">> $FILE
 
 echo "rvv_smatmulop_f32_tiling (with selection kernel on 2048)"
 echo "rvv_smatmulop_f32_tiling (with selection kernel on 2048)" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 2048 2 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 2048 4 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 2048 8 | grep "BENCHMARK_RECORD">> $FILE
-./build/riscv64/rvv_smatmulop_f32_tiling 2048 16 | grep "BENCHMARK_RECORD">> $FILE
 
 echo "rvv_smatmulop_f32_tiling (with selection kernel on 4096)"
 echo "rvv_smatmulop_f32_tiling (with selection kernel on 4096)" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 4096 2 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 4096 4 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_tiling 4096 8 | grep "BENCHMARK_RECORD">> $FILE
-./build/riscv64/rvv_smatmulop_f32_tiling 4096 16 | grep "BENCHMARK_RECORD">> $FILE
 
 ####
 
@@ -60,35 +55,30 @@ echo "rvv_smatmulop_f32_reordered_tiling (with selection kernel on 256)" >> $FIL
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 256 2 | grep "BENCHMARK_RECORD" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 256 4 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 256 8 | grep "BENCHMARK_RECORD">> $FILE
-./build/riscv64/rvv_smatmulop_f32_reordered_tiling 256 16 | grep "BENCHMARK_RECORD">> $FILE
 
 echo "rvv_smatmulop_f32_reordered_tiling (with selection kernel on 512)"
 echo "rvv_smatmulop_f32_reordered_tiling (with selection kernel on 512)" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 512 2 | grep "BENCHMARK_RECORD" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 512 4 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 512 8 | grep "BENCHMARK_RECORD">> $FILE
-./build/riscv64/rvv_smatmulop_f32_reordered_tiling 512 16 | grep "BENCHMARK_RECORD">> $FILE
 
 echo "rvv_smatmulop_f32_reordered_tiling (with selection kernel on 1024)"
 echo "rvv_smatmulop_f32_reordered_tiling (with selection kernel on 1024)" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 1024 2 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 1024 4 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 1024 8 | grep "BENCHMARK_RECORD">> $FILE
-./build/riscv64/rvv_smatmulop_f32_reordered_tiling 1024 16 | grep "BENCHMARK_RECORD">> $FILE
 
 echo "rvv_smatmulop_f32_reordered_tiling (with selection kernel on 2048)"
 echo "rvv_smatmulop_f32_reordered_tiling (with selection kernel on 2048)" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 2048 2 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 2048 4 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 2048 8 | grep "BENCHMARK_RECORD">> $FILE
-./build/riscv64/rvv_smatmulop_f32_reordered_tiling 2048 16 | grep "BENCHMARK_RECORD">> $FILE
 
 echo "rvv_smatmulop_f32_reordered_tiling (with selection kernel on 4096)"
 echo "rvv_smatmulop_f32_reordered_tiling (with selection kernel on 4096)" >> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 4096 2 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 4096 4 | grep "BENCHMARK_RECORD">> $FILE
 ./build/riscv64/rvv_smatmulop_f32_reordered_tiling 4096 8 | grep "BENCHMARK_RECORD">> $FILE
-./build/riscv64/rvv_smatmulop_f32_reordered_tiling 4096 16 | grep "BENCHMARK_RECORD">> $FILE
 
 
 # variable size
