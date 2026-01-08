@@ -165,7 +165,6 @@ void multiply_gemm_4x4(float* mat1, float* mat2, float* res, const int size) {
         }
     }
 
-    free(oB);
 }
 
 void multiply_gemm_8x8(float* mat1, float* mat2, float* res, const int size) {
