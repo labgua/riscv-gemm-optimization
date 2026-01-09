@@ -7,6 +7,7 @@
 # change setting in builder.sh file for compiler settings
 
 RISCV_OPT = -march=rv64gcv -mabi=lp64d
+RISCV_OPT_NOVET = -march=rv64gc -mabi=lp64d
 
 TARGETS = smatmul_baseline \
           smatmul_loopinterchange_O0 \
@@ -97,13 +98,13 @@ rvv2_smatmul_recursive_O3: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 ## NEW VERSIONS
 smatmul_f32_baseline: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	./builder.sh x86_64 -O3 -fno-tree-vectorize -o build/x86_64/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_X86)
-	./builder.sh riscv64_emu -O3 -fno-tree-vectorize -o build/qemu/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_QEMU) $(RISCV_OPT)
-	./builder.sh riscv64 -O3 -fno-tree-vectorize-o build/riscv64/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT)
+	./builder.sh riscv64_emu -O3 -fno-tree-vectorize -o build/qemu/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_QEMU) $(RISCV_OPT_NOVET)
+	./builder.sh riscv64 -O3 -fno-tree-vectorize-o build/riscv64/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT_NOVET)
 
 smatmulop_f32_baseline: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	./builder.sh x86_64 -O3 -fno-tree-vectorize -o build/x86_64/smatmulop_f32_baseline smatmulop_f32_baseline.c $(UTILS_O_X86)
-	./builder.sh riscv64_emu -O3 -fno-tree-vectorize -o build/qemu/smatmulop_f32_baseline smatmulop_f32_baseline.c $(UTILS_O_QEMU) $(RISCV_OPT)
-	./builder.sh riscv64 -O3 -fno-tree-vectorize -o build/riscv64/smatmulop_f32_baseline smatmulop_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT)
+	./builder.sh riscv64_emu -O3 -fno-tree-vectorize -o build/qemu/smatmulop_f32_baseline smatmulop_f32_baseline.c $(UTILS_O_QEMU) $(RISCV_OPT_NOVET)
+	./builder.sh riscv64 -O3 -fno-tree-vectorize -o build/riscv64/smatmulop_f32_baseline smatmulop_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT_NOVET)
 
 rvv_smatmulop_f32_tiling: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	./builder.sh riscv64_emu -O3 -o build/qemu/rvv_smatmulop_f32_tiling rvv_smatmulop_f32_tiling.c $(UTILS_O_QEMU) $(RISCV_OPT)
