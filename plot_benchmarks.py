@@ -44,7 +44,7 @@ def plot_absolute_execution_time(filepath):
         times = []
         used_sizes = []
         for size in sizes:
-            if (version, size) in exec_:
+            if (version, size) in exec_data:
                 times.append(exec_data[(version, size)])
                 used_sizes.append(size)
         if times:
