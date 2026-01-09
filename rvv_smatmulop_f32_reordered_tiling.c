@@ -5,7 +5,7 @@
 #include <riscv_vector.h>
 #include "utils.h"
 
-#define DEBUG_FLAG 1
+#define DEBUG_FLAG 0
 #define SIZE 8
 
 // TILE SIZE SETTING
