@@ -99,7 +99,7 @@ rvv2_smatmul_recursive_O3: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 smatmul_f32_baseline: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	./builder.sh x86_64 -O3 -fno-tree-vectorize -o build/x86_64/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_X86)
 	./builder.sh riscv64_emu -O3 -fno-tree-vectorize -o build/qemu/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_QEMU) $(RISCV_OPT_NOVET)
-	./builder.sh riscv64 -O3 -fno-tree-vectorize-o build/riscv64/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT_NOVET)
+	./builder.sh riscv64 -O3 -fno-tree-vectorize -o build/riscv64/smatmul_f32_baseline smatmul_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT_NOVET)
 
 smatmulop_f32_baseline: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	./builder.sh x86_64 -O3 -fno-tree-vectorize -o build/x86_64/smatmulop_f32_baseline smatmulop_f32_baseline.c $(UTILS_O_X86)
@@ -116,6 +116,10 @@ rvv_smatmulop_f32_reordered_tiling: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RIS
 
 	./builder.sh riscv64_emu -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_parallel rvv_smatmulop_f32_reordered_tiling_parallel.c -fopenmp $(UTILS_O_QEMU) $(RISCV_OPT)
 	./builder.sh riscv64 -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_parallel rvv_smatmulop_f32_reordered_tiling_parallel.c -fopenmp $(UTILS_O_RISCV) $(RISCV_OPT)
+
+rvv_smatmulop_f32_ktiling: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	./builder.sh riscv64_emu -O3 -o build/qemu/rvv_smatmulop_f32_ktiling rvv_smatmulop_f32_ktiling.c $(UTILS_O_QEMU) $(RISCV_OPT)
+	./builder.sh riscv64 -O3 -o build/riscv64/rvv_smatmulop_f32_ktiling rvv_smatmulop_f32_ktiling.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
 
 #smatmul_pfor:
