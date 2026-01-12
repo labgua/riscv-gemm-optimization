@@ -24,7 +24,7 @@ int main(int argc, char* argv[]) {
     printf("Testing matrix ");
 
     int size = SIZE;
-    if (argc == 2) {
+    if (argc >= 2) {
         size = atoi( argv[1] );
     }
 
