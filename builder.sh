@@ -1,9 +1,9 @@
 #!/bin/bash
 
-# builder.sh v1
-# usage: <ARCH_TARGET> [all options for compile with gcc ..]
-# - this file compiles the target if it is possible
-# - if the arch can, try to compile te target else does nothing
+# builder.sh v2
+# usage: <ARCH_TARGET>
+# - this file chooses the compiler for the target if it is possible
+# - if the arch can, return the exec-compiler else return true 
 
 
 # Options
@@ -17,19 +17,14 @@ CMD_RISCV=riscv64-linux-gnu-gcc
 ARCH_HOST=$(uname -m)
 ARCH_TARGET=$1
 
-## riscv_qemu (from x86)
 if [ "$ARCH_HOST" == "x86_64" ] && [ "$ARCH_TARGET" == "riscv64_emu" ]; then
-    $CMD_QEMU ${@:2}
-
-## x86 (from x86)
+    echo "$CMD_QEMU"
 elif [ "$ARCH_HOST" == "x86_64" ] && [ "$ARCH_TARGET" == "x86_64" ]; then
-    $CMD_X86 ${@:2}
-
-## riscv64 (from riscv64)
+    echo "$CMD_X86"
 elif [ "$ARCH_HOST" == "riscv64" ] && [ "$ARCH_TARGET" == "riscv64" ]; then
-    $CMD_RISCV ${@:2}
-
+    echo "$CMD_RISCV"
 else
-    echo "No (Arch:$ARCH_HOST <-> Target:$ARCH_TARGET)"
-    exit 0 # no error, to avoid break in make
+    # Nessun compilatore disponibile → usa un comando neutro
+    echo "true"
+    exit 0
 fi
