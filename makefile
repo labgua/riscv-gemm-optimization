@@ -10,6 +10,7 @@
 CC_X86_64 := $(shell ./builder.sh x86_64)
 CC_RISCV64 := $(shell ./builder.sh riscv64)
 CC_RISCV64_EMU := $(shell ./builder.sh riscv64_emu)
+CC_RISCV64_14 := gcc
 
 RISCV_OPT = -march=rv64gcv -mabi=lp64d
 RISCV_OPT_NOVET = -march=rv64gc -mabi=lp64d
@@ -113,7 +114,7 @@ smatmulop_f32_baseline: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	$(CC_RISCV64) -O3 -fno-tree-vectorize -o build/riscv64/smatmulop_f32_baseline smatmulop_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT_NOVET)
 
 smatmulop_f32_baseline_autovect: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
-	$(CC_RISCV64) -O3 -o build/riscv64/smatmulop_f32_baseline_autovect smatmulop_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT)
+	$(CC_RISCV64_14) -O3 -o build/riscv64/smatmulop_f32_baseline_autovect smatmulop_f32_baseline.c $(UTILS_O_RISCV) $(RISCV_OPT) -ffast-math
 
 rvv_smatmulop_f32_tiling: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_tiling rvv_smatmulop_f32_tiling.c $(UTILS_O_QEMU) $(RISCV_OPT)
