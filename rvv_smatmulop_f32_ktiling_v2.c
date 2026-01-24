@@ -6,7 +6,7 @@
 #include "utils.h"
 
 #define DEBUG_FLAG 0
-#define DEBUG_PRINT_IO 1
+#define DEBUG_PRINT_IO 0
 #define SIZE 8
 
 // TILE SIZE SETTING
@@ -656,7 +656,7 @@ int main(int argc, char* argv[]) {
     printf("Execution time: %f seconds\n", execution_time);
 
     // line to grep results in benchmark phase
-    printf("> BENCHMARK_RECORD : rvv_smatmulop_f32_ktiling, %f, %d, %d, %d\n", execution_time, size, tile_size, k_block_size);
+    printf("> BENCHMARK_RECORD : rvv_smatmulop_f32_ktiling_v2, %f, %d, %d, %d\n", execution_time, size, tile_size, k_block_size);
 
     // Free memory
     free(A);
