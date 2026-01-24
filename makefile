@@ -139,12 +139,12 @@ onednn_rvv_gemm_f32: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 ## TEST code
 
 test_onednn_copy: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
-	$(CC_RISCV64_EMU) -O3 -o build/qemu/test_onednn_copy test_onednn_copy.c $(UTILS_O_QEMU) $(RISCV_OPT)
-	$(CC_RISCV64) -O3 -o build/riscv64/test_onednn_copy test_onednn_copy.c $(UTILS_O_RISCV) $(RISCV_OPT)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/test_onednn_copy test/test_onednn_copy.c $(UTILS_O_QEMU) $(RISCV_OPT)
+	$(CC_RISCV64) -O3 -o build/riscv64/test_onednn_copy test/test_onednn_copy.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
 test_fma_vv_sv:
-	$(CC_RISCV64_EMU) -O3 -o build/qemu/test_fma_vv_sv test_fma_vv_sv.c $(RISCV_OPT)
-	$(CC_RISCV64) -O3 -o build/riscv64/test_fma_vv_sv test_fma_vv_sv.c $(UTILS_O_RISCV) $(RISCV_OPT)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/test_fma_vv_sv test/test_fma_vv_sv.c $(RISCV_OPT)
+	$(CC_RISCV64) -O3 -o build/riscv64/test_fma_vv_sv test/test_fma_vv_sv.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
 
 #smatmul_pfor:
