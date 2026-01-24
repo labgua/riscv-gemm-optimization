@@ -6,6 +6,7 @@
 #include "utils.h"
 
 #define DEBUG_FLAG 0
+#define DEBUG_PRINT_IO 0
 #define SIZE 8
 
 // TILE SIZE SETTING
@@ -224,11 +225,11 @@ void multiply_gemm_8x8_k_tiled_packedB(
     const int J_BLOCK = 128;
 
     // pannello grande riusabile di B
-    float* B_panel_L2 = malloc(sizeof(float) * size * J_BLOCK);
+    float* B_panel_L2 = malloc(sizeof(float) * size * J_BLOCK);        /// K_BLOCK * J_BLOCK
 
     // pannelli A e B per microkernel
-    float (*A_panel)[K_BLOCK] = malloc(sizeof(float) * MR * K_BLOCK);
-    float (*B_panel)[NR]      = malloc(sizeof(float) * K_BLOCK * NR);
+    float (*A_panel)[K_BLOCK] = malloc(sizeof(float) * MR * K_BLOCK);  ///  MR x K_BLOCK
+    float (*B_panel)[NR]      = malloc(sizeof(float) * K_BLOCK * NR);  ///  K_BLOCK x NR
 
     // ---- loop su blocchi di colonne per riuso di B ----
     for (int jb = 0; jb < size; jb += J_BLOCK) {
@@ -240,6 +241,12 @@ void multiply_gemm_8x8_k_tiled_packedB(
             memcpy(&B_panel_L2[k * jb_size],
                    &B[k][jb],
                    sizeof(float) * jb_size);
+        }
+
+        if( DEBUG_FLAG > 0 ){
+            printf("B_panel_L2 ");
+            //print_matrixf32(B_panel_L2, size, J_BLOCK, 0);
+            print_lmatrixf32(B_panel_L2, size, size * J_BLOCK);
         }
 
         // ---- blocchi su righe di A ----
@@ -273,11 +280,21 @@ void multiply_gemm_8x8_k_tiled_packedB(
                                sizeof(float) * k_blk);
                     }
 
+                    if( DEBUG_FLAG > 0 ){
+                        printf("A_panel ");
+                        print_lmatrixf32((float*)A_panel, K_BLOCK, MR * K_BLOCK);
+                    }
+
                     // --- pack B da pannello L2 ---
                     for (int k = 0; k < k_blk; ++k) {
                         memcpy(&B_panel[k][0],
                                &B_panel_L2[(kb + k) * jb_size + jh],
                                sizeof(float) * NR);
+                    }
+
+                    if( DEBUG_FLAG > 0 ){
+                        printf("B_panel ");
+                        print_lmatrixf32((float*)B_panel, NR, K_BLOCK * NR);
                     }
 
                     // ---- calcolo vettoriale ----
@@ -576,12 +593,12 @@ int main(int argc, char* argv[]) {
     srand( DEBUG_FLAG ? 1 : time(NULL) );
 
     for(int i = 0; i < size * size; i++ ){
-       A[i] = rand() % 10 + 1;
-       B[i] = rand() % 10 + 1;
+       A[i] = rand() % 10 + 1;;
+       B[i] = rand() % 10 + 1;;
        C[i] = 0.0;
     }
 
-    IFDEBUG{
+    if(DEBUG_PRINT_IO == 1){
         printf("A");
         print_matrixf32(A, size, size, 0);
         printf("B");
@@ -599,7 +616,7 @@ int main(int argc, char* argv[]) {
     //double end_time = omp_get_wtime();
     clock_t end_time = clock();
 
-    IFDEBUG{
+    if(DEBUG_PRINT_IO == 1){
         printf("C");
         print_matrixf32(C, size, size, 0);
     }
