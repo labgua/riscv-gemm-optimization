@@ -50,6 +50,14 @@ void print_matrixf32(float* M, int tile_size, int size, int print_inline){
     }
 }
 
+void print_lmatrixf32(float* M, int row_size, int num_elements){
+    printf("> Print line-Matrix f32 (row_size:%d,  num_elements:%d):\n", row_size, num_elements);
+    for( int i = 0; i < num_elements; i++ ){
+        printf("%.1f\t", M[i]);
+        if( (i+1) % row_size == 0 ) printf("\n");
+    }
+}
+
 #ifdef __riscv
 
 void print_vmatrixf32(int size, vfloat32m1_t c1, vfloat32m1_t c2){
