@@ -6,12 +6,19 @@
 #include <stdbool.h> 
 #include "utils.h"
 
+// [0, 1]
 #define DEBUG_INPUT_FLAG 0
+
+// [0, 1, 2, 3, 4]
 #define DEBUG_KERNEL 0
-#define DEBUG_PRINT_IO 0
+
+// [0, 1]
+#define DEBUG_PRINT_IO 1
 
 #define SIZE 2
 
+
+//// AGGIUSTARE LE CONDIZIONI DI ABILITAZIONE DEBUG.....
 
 // TODO verificare sia questo il valore
 #define PAGE_4K 4096
@@ -96,6 +103,9 @@ void copy_A(bool isTransA, int K, const float *A, const int lda, float *ws) {
     
     const int m = get_m_unroll_factor();
 
+    float* ws_buffer_debug = NULL;
+    if( DEBUG_KERNEL >= 3 ) ws_buffer_debug = ws;
+
     // Two-way software pipelining: overlap load and store
     for (int k = 0; k < K; k++) {
         int i = 0;
@@ -147,6 +157,12 @@ void copy_A(bool isTransA, int K, const float *A, const int lda, float *ws) {
         }
         //}
         ws += m;
+
+        if( DEBUG_KERNEL >= 3 ) {
+            printf("copy_A>: step-%d", i);
+            ///print_matrixf32(ws_buffer_debug, K, lda, 0);
+            print_lmatrixf32(ws_buffer_debug, get_m_unroll_factor(), K);
+        }
     }
 }
 
@@ -256,12 +272,39 @@ static void kernel_mxn_4x4(int K, const float *A, int lda, const float *B,
             const float *b_ptr = &B[k]; // no TransB
             const int b_stride = ldb; // no TransB
 
+            if( DEBUG_KERNEL >= 4 ) {
+                float tmp[4];
+                __riscv_vse32_v_f32m1(tmp, v_a, vl);
+                printf(">> row c0 = bi:%f (x) Va:(%f, %f, %f, %f)\n", 
+                    b_ptr[0 * b_stride], tmp[0], tmp[1], tmp[2], tmp[3]);
+            }
             v_c0 = __riscv_vfmacc_vf_f32m1(
                     v_c0, b_ptr[0 * b_stride], v_a, vl);
+
+            if( DEBUG_KERNEL >= 4 ) {
+                float tmp[4];
+                __riscv_vse32_v_f32m1(tmp, v_a, vl);
+                printf(">> row c1 = bi:%f (x) Va:(%f, %f, %f, %f)\n", 
+                    b_ptr[1 * b_stride], tmp[0], tmp[1], tmp[2], tmp[3]);
+            }
             v_c1 = __riscv_vfmacc_vf_f32m1(
                     v_c1, b_ptr[1 * b_stride], v_a, vl);
+
+            if( DEBUG_KERNEL >= 4 ) {
+                float tmp[4];
+                __riscv_vse32_v_f32m1(tmp, v_a, vl);
+                printf(">> row c2 = bi:%f (x) Va:(%f, %f, %f, %f)\n", 
+                    b_ptr[2 * b_stride], tmp[0], tmp[1], tmp[2], tmp[3]);
+            }
             v_c2 = __riscv_vfmacc_vf_f32m1(
                     v_c2, b_ptr[2 * b_stride], v_a, vl);
+            
+            if( DEBUG_KERNEL >= 4 ) {
+                float tmp[4];
+                __riscv_vse32_v_f32m1(tmp, v_a, vl);
+                printf(">> row c3 = bi:%f (x) Va:(%f, %f, %f, %f)\n", 
+                    b_ptr[3 * b_stride], tmp[0], tmp[1], tmp[2], tmp[3]);
+            }
             v_c3 = __riscv_vfmacc_vf_f32m1(
                     v_c3, b_ptr[3 * b_stride], v_a, vl);
 
@@ -495,7 +538,8 @@ void block_ker(const int M, const int N, const int K, const float *A,
 
     if(DEBUG_KERNEL){
         printf("Print WS matrix\n");
-        print_matrixf32(ws, K, lda, 0);
+        //print_matrixf32(ws, K, lda, 0);
+        print_lmatrixf32(ws, m_unroll, K);
     }
 
     // no JIT
@@ -521,7 +565,8 @@ void block_ker(const int M, const int N, const int K, const float *A,
 
                     if(DEBUG_KERNEL){
                         printf("Print WS matrix (after copy)\n");
-                        print_matrixf32(ws, K, lda, 0);
+                        //print_matrixf32(ws, K, lda, 0);
+                        print_lmatrixf32(ws, m_unroll, K);
                     }
                 }  
 
@@ -933,6 +978,13 @@ int main(int argc, char* argv[]) {
             int col = i % size;
             A[i] = i;
             B[i] = (row == col) ? 1.0f : 0.0f;
+        }
+
+        else if( input_case == 5 ){ // ID x index -> X
+            int row = i / size;
+            int col = i % size;
+            A[i] = (row == col) ? 1.0f : 0.0f;
+            B[i] = i;
         }
 
         // Default: random integer matrices in [1, 10]
