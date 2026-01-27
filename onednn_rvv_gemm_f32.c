@@ -6,19 +6,39 @@
 #include <stdbool.h> 
 #include "utils.h"
 
+/**
+ * onednn_rvv_gemm_f32 WITHOUT oneDNN
+ * - The onednn code implements matrix multiplication following BLAS conventions,
+ *   treating A and B as column-major matrices from a logical standpoint.
+ * - Their kernel handles the row-major format but are logical reinterpreted
+ *   as column-major matrixes
+ * - As in BLAS, the implemented product is defined in column-major order:
+ *   C_col(N×M) = A_col(N×K) × B_col(K×M)
+ * - Assuming transA=false and transB=false, if A and B are stored in row-major layout
+ *   without reinterpretation, the computed result corresponds to:
+ *   matmul(A, B) = ((A^T) × (B^T))^T = B × A
+ * - Therefore, swapping A and B in the call yields:
+ *   matmul(B, A) = ((B^T) × (A^T))^T = A × B
+ * - In this first implementation between square matrices, it is not necessary to 
+ *   manage the dimensions (N=M=K), but in the case of a generic product, it is also 
+ *   necessary to swap N with M for a matrix product between generic non-square matrices.
+ */
+
 // [0, 1]
 #define DEBUG_INPUT_FLAG 0
 
 // [0, 1, 2, 3, 4]
-#define DEBUG_KERNEL 0
+#define DEBUG_KERNEL 4
 
 // [0, 1]
 #define DEBUG_PRINT_IO 1
 
+// [0, 1]
+#define RANDOM 0
+
 #define SIZE 2
 
 
-//// AGGIUSTARE LE CONDIZIONI DI ABILITAZIONE DEBUG.....
 
 // TODO verificare sia questo il valore
 #define PAGE_4K 4096
@@ -28,9 +48,6 @@
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 
-
-//// ASSUNZIONE
-//// isTransX == True ===> Matrice X column-major
 
 /*******************************************************************************
 * Copyright 2018 Intel Corporation
@@ -110,7 +127,6 @@ void copy_A(bool isTransA, int K, const float *A, const int lda, float *ws) {
     for (int k = 0; k < K; k++) {
         int i = 0;
 
-        /*
         if (isTransA) { /// No TransA
             ptrdiff_t stride = lda * sizeof(float);
             if (i < m) {
@@ -134,34 +150,34 @@ void copy_A(bool isTransA, int K, const float *A, const int lda, float *ws) {
                 }
                 __riscv_vse32_v_f32m4(ws + i0, v_a0, vl0);
             }
-        */
-        //} else {
-        const float *a_ptr = A + k * lda;
-        if (i < m) {
-            size_t vl0 = __riscv_vsetvl_e32m4(m - i);
-            vfloat32m4_t v_a0 = __riscv_vle32_v_f32m4(a_ptr + i, vl0);
-            int i0 = i;
-            i += vl0;
+        
+        } else {
+            const float *a_ptr = A + k * lda;
+            if (i < m) {
+                size_t vl0 = __riscv_vsetvl_e32m4(m - i);
+                vfloat32m4_t v_a0 = __riscv_vle32_v_f32m4(a_ptr + i, vl0);
+                int i0 = i;
+                i += vl0;
 
-            while (i < m) {
-                size_t vl1 = __riscv_vsetvl_e32m4(m - i);
-                vfloat32m4_t v_a1 = __riscv_vle32_v_f32m4(a_ptr + i, vl1);
+                while (i < m) {
+                    size_t vl1 = __riscv_vsetvl_e32m4(m - i);
+                    vfloat32m4_t v_a1 = __riscv_vle32_v_f32m4(a_ptr + i, vl1);
+                    __riscv_vse32_v_f32m4(ws + i0, v_a0, vl0);
+
+                    i0 = i;
+                    vl0 = vl1;
+                    v_a0 = v_a1;
+                    i += vl1;
+                }
                 __riscv_vse32_v_f32m4(ws + i0, v_a0, vl0);
-
-                i0 = i;
-                vl0 = vl1;
-                v_a0 = v_a1;
-                i += vl1;
             }
-            __riscv_vse32_v_f32m4(ws + i0, v_a0, vl0);
         }
-        //}
         ws += m;
 
         if( DEBUG_KERNEL >= 3 ) {
             printf("copy_A>: step-%d", i);
             ///print_matrixf32(ws_buffer_debug, K, lda, 0);
-            print_lmatrixf32(ws_buffer_debug, get_m_unroll_factor(), K);
+            print_lmatrixf32(ws_buffer_debug, get_m_unroll_factor(), K * get_m_unroll_factor());
         }
     }
 }
@@ -190,18 +206,18 @@ void copy_A(bool isTransA, int K, const float *A, const int lda, float *ws) {
 
 /*
  * KERNEL TEMPLATE 
- * isTransA = false, isTransB = false, X:kernel_size
+ * X:kernel_size
  *
- * static void kernel_mxn_XxX(int K, const float *A, int lda, const float *B,
+ * static void kernel_mxn_XxX(bool isTransA, bool isTransB, int K, const float *A, int lda, const float *B,
  *        int ldb, float *C, int ldc, float alpha, float beta,
  *        int ithr);
  */
 
-static void kernel_mxn_2x2(int K, const float *A, int lda, const float *B,
+static void kernel_mxn_2x2(bool isTransA, bool isTransB, int K, const float *A, int lda, const float *B,
         int ldb, float *C, int ldc, float alpha, float beta,
         int ithr)
 {
-    if(DEBUG_KERNEL)printf("> kernel_mxn_2x2\n");
+    if(DEBUG_KERNEL > 0)printf("> kernel_mxn_2x2\n");
 
     const int m = get_m_unroll_factor();
     //const int n = 2;
@@ -217,15 +233,15 @@ static void kernel_mxn_2x2(int K, const float *A, int lda, const float *B,
 
         for (int k = 0; k < K; ++k) {
             vfloat32m1_t v_a;
-            //if (isTransA) {  // isTransA == false
-            //    ptrdiff_t stride_a = lda * sizeof(float);
-            //    v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
-            //} else {
+            if (isTransA) {  // isTransA == false
+                ptrdiff_t stride_a = lda * sizeof(float);
+                v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
+            } else {
                 v_a = __riscv_vle32_v_f32m1(A + i + k * lda, vl);
-            //}
+            }
 
-            const float *b_ptr = &B[k];  // no TransB
-            const int b_stride = ldb;  // no TransB
+            const float *b_ptr = isTransB ? &B[k * ldb] : &B[k];
+            const int b_stride = isTransB ? 1 : ldb;
 
             v_c0 = __riscv_vfmacc_vf_f32m1(
                     v_c0, b_ptr[0 * b_stride], v_a, vl);
@@ -240,11 +256,14 @@ static void kernel_mxn_2x2(int K, const float *A, int lda, const float *B,
     }   
 }
 
-static void kernel_mxn_4x4(int K, const float *A, int lda, const float *B,
+static void kernel_mxn_4x4(bool isTransA, bool isTransB, int K, const float *A, int lda, const float *B,
         int ldb, float *C, int ldc, float alpha, float beta,
         int ithr)
 {
-    if(DEBUG_KERNEL)printf("> kernel_mxn_4x4\n");
+    if(DEBUG_KERNEL > 0)printf("> kernel_mxn_4x4 isTransA:%s isTransB:%s\n",
+        isTransA ? "TRUE\0" : "FALSE\0",
+        isTransB ? "TRUE\0" : "FALSE\0"
+    );
 
     const int m = get_m_unroll_factor();
     //const int n = 4;
@@ -262,49 +281,36 @@ static void kernel_mxn_4x4(int K, const float *A, int lda, const float *B,
 
         for (int k = 0; k < K; ++k) {
             vfloat32m1_t v_a;
-            //if (isTransA) { // isTransA == false
-            //    ptrdiff_t stride_a = lda * sizeof(float);
-            //    v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
-            //} else {
-            v_a = __riscv_vle32_v_f32m1(A + i + k * lda, vl);
-            //}
-
-            const float *b_ptr = &B[k]; // no TransB
-            const int b_stride = ldb; // no TransB
-
-            if( DEBUG_KERNEL >= 4 ) {
-                float tmp[4];
-                __riscv_vse32_v_f32m1(tmp, v_a, vl);
-                printf(">> row c0 = bi:%f (x) Va:(%f, %f, %f, %f)\n", 
-                    b_ptr[0 * b_stride], tmp[0], tmp[1], tmp[2], tmp[3]);
+            if (isTransA) { // isTransA == false
+                ptrdiff_t stride_a = lda * sizeof(float);
+                v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
+            } else {
+                v_a = __riscv_vle32_v_f32m1(A + i + k * lda, vl);
             }
+
+            const float *b_ptr = isTransB ? &B[k * ldb] : &B[k];
+            const int b_stride = isTransB ? 1 : ldb;
+
+            if( DEBUG_KERNEL >= 4 ){
+                float tmp[4] = {0.0f, 0.0f, 0.0f, 0.0f};
+                size_t vl2 = __riscv_vsetvl_e32m1(4);
+                __riscv_vse32_v_f32m1(tmp, v_a, vl2);
+                printf(">> indexA[%d + %d * %d]  indexB[%d] \n   calc: row-Va:(%f, %f, %f, %f) (x) col-b:(%f, %f, %f, %f)\n",
+                    i, k, lda,   k,
+                    tmp[0], tmp[1], tmp[2], tmp[3],
+                    b_ptr[0 * b_stride], b_ptr[1 * b_stride], b_ptr[2 * b_stride], b_ptr[3 * b_stride]
+                );
+            }
+
             v_c0 = __riscv_vfmacc_vf_f32m1(
                     v_c0, b_ptr[0 * b_stride], v_a, vl);
 
-            if( DEBUG_KERNEL >= 4 ) {
-                float tmp[4];
-                __riscv_vse32_v_f32m1(tmp, v_a, vl);
-                printf(">> row c1 = bi:%f (x) Va:(%f, %f, %f, %f)\n", 
-                    b_ptr[1 * b_stride], tmp[0], tmp[1], tmp[2], tmp[3]);
-            }
             v_c1 = __riscv_vfmacc_vf_f32m1(
                     v_c1, b_ptr[1 * b_stride], v_a, vl);
 
-            if( DEBUG_KERNEL >= 4 ) {
-                float tmp[4];
-                __riscv_vse32_v_f32m1(tmp, v_a, vl);
-                printf(">> row c2 = bi:%f (x) Va:(%f, %f, %f, %f)\n", 
-                    b_ptr[2 * b_stride], tmp[0], tmp[1], tmp[2], tmp[3]);
-            }
             v_c2 = __riscv_vfmacc_vf_f32m1(
                     v_c2, b_ptr[2 * b_stride], v_a, vl);
-            
-            if( DEBUG_KERNEL >= 4 ) {
-                float tmp[4];
-                __riscv_vse32_v_f32m1(tmp, v_a, vl);
-                printf(">> row c3 = bi:%f (x) Va:(%f, %f, %f, %f)\n", 
-                    b_ptr[3 * b_stride], tmp[0], tmp[1], tmp[2], tmp[3]);
-            }
+
             v_c3 = __riscv_vfmacc_vf_f32m1(
                     v_c3, b_ptr[3 * b_stride], v_a, vl);
 
@@ -324,11 +330,11 @@ static void kernel_mxn_4x4(int K, const float *A, int lda, const float *B,
 
 }
 
-static void kernel_mxn_8x8(int K, const float *A, int lda, const float *B,
+static void kernel_mxn_8x8(bool isTransA, bool isTransB, int K, const float *A, int lda, const float *B,
         int ldb, float *C, int ldc, float alpha, float beta,
         int ithr)
 {
-    if(DEBUG_KERNEL)printf("> kernel_mxn_8x8\n");
+    if(DEBUG_KERNEL > 0)printf("> kernel_mxn_8x8\n");
 
     const int m = get_m_unroll_factor();
     //const int n = 8;
@@ -350,15 +356,15 @@ static void kernel_mxn_8x8(int K, const float *A, int lda, const float *B,
 
         for (int k = 0; k < K; ++k) {
             vfloat32m1_t v_a;
-            //if (isTransA) {  // isTransA == false
-            //    ptrdiff_t stride_a = lda * sizeof(float);
-            //    v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
-            //} else {
-            v_a = __riscv_vle32_v_f32m1(A + i + k * lda, vl);
-            //}
+            if (isTransA) {  // isTransA == false
+                ptrdiff_t stride_a = lda * sizeof(float);
+                v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
+            } else {
+                v_a = __riscv_vle32_v_f32m1(A + i + k * lda, vl);
+            }
 
-            const float *b_ptr = &B[k]; // no TransB
-            const int b_stride = ldb; // no TransB
+            const float *b_ptr = isTransB ? &B[k * ldb] : &B[k];
+            const int b_stride = isTransB ? 1 : ldb;
 
             v_c0 = __riscv_vfmacc_vf_f32m1(
                     v_c0, b_ptr[0 * b_stride], v_a, vl);
@@ -391,11 +397,11 @@ static void kernel_mxn_8x8(int K, const float *A, int lda, const float *B,
     }
 }
 
-static void kernel_mxn_16x16(int K, const float *A, int lda, const float *B,
+static void kernel_mxn_16x16(bool isTransA, bool isTransB, int K, const float *A, int lda, const float *B,
         int ldb, float *C, int ldc, float alpha, float beta,
         int ithr)
 {
-    if(DEBUG_KERNEL)printf("> kernel_mxn_16x16\n");
+    if(DEBUG_KERNEL > 0)printf("> kernel_mxn_16x16\n");
 
     const int m = get_m_unroll_factor();
     //const int n = 16;
@@ -426,15 +432,15 @@ static void kernel_mxn_16x16(int K, const float *A, int lda, const float *B,
 
         for (int k = 0; k < K; ++k) {
             vfloat32m1_t v_a;
-            //if (isTransA) {  // isTransA == false
-            //    ptrdiff_t stride_a = lda * sizeof(float);
-            //    v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
-            //} else {
-            v_a = __riscv_vle32_v_f32m1(A + i + k * lda, vl);
-            //}
+            if (isTransA) {  // isTransA == false
+                ptrdiff_t stride_a = lda * sizeof(float);
+                v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
+            } else {
+                v_a = __riscv_vle32_v_f32m1(A + i + k * lda, vl);
+            }
 
-            const float *b_ptr = &B[k]; // no TransB
-            const int b_stride = ldb; // no TransB
+            const float *b_ptr = isTransB ? &B[k * ldb] : &B[k];
+            const int b_stride = isTransB ? 1 : ldb;
 
             v_c0 = __riscv_vfmacc_vf_f32m1(
                     v_c0, b_ptr[0 * b_stride], v_a, vl);
@@ -491,37 +497,37 @@ static void kernel_mxn_16x16(int K, const float *A, int lda, const float *B,
     } 
 }
 
-void kernel_mxn(int K, const float *A, const int lda, const float *B,
+void kernel_mxn(bool isTransA, bool isTransB, int K, const float *A, const int lda, const float *B,
         const int ldb, float *C, const int ldc, const float alpha,
         const float beta, int ithr) 
 {
-    if(DEBUG_KERNEL) printf("> kernel_mxn: alpha:%f  beta:%f\n", alpha, beta);
+    if(DEBUG_KERNEL > 0) printf("> kernel_mxn: alpha:%f  beta:%f\n", alpha, beta);
     int n_unroll = get_n_unroll_factor();
 
     switch (n_unroll) {
         case 2:
             kernel_mxn_2x2(
-                    K, A, lda, B, ldb, C, ldc, alpha, beta, ithr);
+                    isTransA, isTransB, K, A, lda, B, ldb, C, ldc, alpha, beta, ithr);
             break;
         case 4:
             kernel_mxn_4x4(
-                    K, A, lda, B, ldb, C, ldc, alpha, beta, ithr);
+                    isTransA, isTransB, K, A, lda, B, ldb, C, ldc, alpha, beta, ithr);
             break;
         case 8:
             kernel_mxn_8x8(
-                    K, A, lda, B, ldb, C, ldc, alpha, beta, ithr);
+                    isTransA, isTransB, K, A, lda, B, ldb, C, ldc, alpha, beta, ithr);
             break;
         case 16:
             kernel_mxn_16x16(
-                    K, A, lda, B, ldb, C, ldc, alpha, beta, ithr);
+                    isTransA, isTransB, K, A, lda, B, ldb, C, ldc, alpha, beta, ithr);
             break;
         default:
             kernel_mxn_2x2(
-                    K, A, lda, B, ldb, C, ldc, alpha, beta, ithr);
+                    isTransA, isTransB, K, A, lda, B, ldb, C, ldc, alpha, beta, ithr);
     }
 }
 
-void block_ker(const int M, const int N, const int K, const float *A,
+void block_ker(bool isTransA, bool isTransB, const int M, const int N, const int K, const float *A,
         const int lda, const float *B, const int ldb, float *C,
         const int ldc, const float alpha, const float beta, float *ws,
         bool do_copy, int ithr) 
@@ -533,13 +539,15 @@ void block_ker(const int M, const int N, const int K, const float *A,
     int Nu = rnd_dn(N, n_unroll);
     int Mu = rnd_dn(M, m_unroll);
 
-    if(DEBUG_KERNEL)
+    if(DEBUG_KERNEL > 0)
     printf("> block_ker: n_unroll:%d   m_unroll:%d        Nu:%d   Mu:%d\n",n_unroll, m_unroll, Nu, Mu);
 
-    if(DEBUG_KERNEL){
-        printf("Print WS matrix\n");
-        //print_matrixf32(ws, K, lda, 0);
-        print_lmatrixf32(ws, m_unroll, K);
+    if(DEBUG_KERNEL > 0){
+        if( ws != NULL ){
+            printf("Print WS matrix\n");
+            //print_matrixf32(ws, K, lda, 0);
+            print_lmatrixf32(ws, m_unroll, K);
+        }
     }
 
     // no JIT
@@ -549,29 +557,31 @@ void block_ker(const int M, const int N, const int K, const float *A,
     // also JIT branch disabled ...
 
     if (do_copy) {
-        if(DEBUG_KERNEL)printf("branch DO_COPY=TRUE\n");
+        if(DEBUG_KERNEL > 0)printf("branch DO_COPY=TRUE\n");
         for (int i = 0; i < Mu; i += m_unroll) {
             for (int j = 0; j < Nu; j += n_unroll) {
-                const float *b = &B[j * ldb]; //no TransB
-                const float *a = &A[i];       //no TransA
+                const float *b = isTransB ? &B[j] : &B[j * ldb];
+                const float *a = isTransA ? &A[i * lda] : &A[i];
 
                 if (j == 0) {
-                    if(DEBUG_KERNEL)
-                    printf("copy_A(false, K:%d, a:&A[%ld], lda:%d, ws)\n", 
+                    if(DEBUG_KERNEL > 0)
+                    printf("copy_A(isTransA:%s, K:%d, a:&A[%ld], lda:%d, ws)\n", 
+                        isTransA ? "TRUE\0" : "FALSE\0",
                         K, (a - A), lda
                     );
 
-                    copy_A(false, K, a, lda, ws);   // isTrans==false
+                    copy_A(isTransA, K, a, lda, ws); 
 
-                    if(DEBUG_KERNEL){
+                    if(DEBUG_KERNEL > 0){
                         printf("Print WS matrix (after copy)\n");
                         //print_matrixf32(ws, K, lda, 0);
-                        print_lmatrixf32(ws, m_unroll, K);
+                        print_lmatrixf32(ws, m_unroll, m_unroll * K);
                     }
                 }  
 
-                if(DEBUG_KERNEL)
-                printf("KERNEL_MXN(K:%d, ws, m_unroll:%d, b:&B[%ld], ldb:%d, &C[%d + %d * %d], ldc:%d, alpha:%f, beta:%f, ithr:%d)\n",
+                if(DEBUG_KERNEL > 0)
+                printf("KERNEL_MXN(false, isTransB:%s, K:%d, ws, m_unroll:%d, b:&B[%ld], ldb:%d, &C[%d + %d * %d], ldc:%d, alpha:%f, beta:%f, ithr:%d)\n",
+                    isTransB ? "TRUE\0" : "FALSE\0",
                     K, m_unroll,
                     (b - B), ldb,
                     i, j, ldc,  ldc,
@@ -579,23 +589,26 @@ void block_ker(const int M, const int N, const int K, const float *A,
                     ithr
                 );
 
-                kernel_mxn(K, ws, m_unroll, b, ldb, &C[i + j * ldc], ldc, alpha, beta, ithr);
+                kernel_mxn(false, isTransB, K, ws, m_unroll, b, ldb, &C[i + j * ldc], ldc, alpha, beta, ithr);
                 
-                if(DEBUG_KERNEL){
+                if(DEBUG_KERNEL > 0){
                     printf("Print C matrix\n");
-                    print_matrixf32(C, K, K, 0);
+                    //print_matrixf32(C, K, K, 0);
+                    print_lmatrixf32(C, ldc, ldc * N);
                 }
             }
         }
     } else {
-        if(DEBUG_KERNEL)printf("branch DO_COPY=FALSE\n");
+        if(DEBUG_KERNEL > 0)printf("branch DO_COPY=FALSE\n");
         for (int i = 0; i < Mu; i += m_unroll) {
             for (int j = 0; j < Nu; j += n_unroll) {
-                const float *b = &B[j * ldb]; //no TransB
-                const float *a = &A[i];       //no TransA
+                const float *b = isTransB ? &B[j] : &B[j * ldb];
+                const float *a = isTransA ? &A[i * lda] : &A[i];
 
-                if(DEBUG_KERNEL)
-                printf("KERNEL_MXN(K:%d, a:&A[%ld], lda:%d, b:&B[%ld], ldb:%d, &C[%d + %d * %d], ldc:%d, alpha:%f, beta:%f, ithr:%d)\n",
+                if(DEBUG_KERNEL > 0)
+                printf("KERNEL_MXN(isTransA:%s, isTransB:%s, K:%d, a:&A[%ld], lda:%d, b:&B[%ld], ldb:%d, &C[%d + %d * %d], ldc:%d, alpha:%f, beta:%f, ithr:%d)\n",
+                    isTransA ? "TRUE\0" : "FALSE\0",
+                    isTransB ? "TRUE\0" : "FALSE\0",
                     K, (a - A), lda,
                     (b - B), ldb,
                     i, j, ldc,  ldc,
@@ -603,7 +616,7 @@ void block_ker(const int M, const int N, const int K, const float *A,
                     ithr
                 );
 
-                kernel_mxn(K, a, lda, b, ldb, &C[i + j * ldc], ldc, alpha, beta, ithr);
+                kernel_mxn(isTransA, isTransB, K, a, lda, b, ldb, &C[i + j * ldc], ldc, alpha, beta, ithr);
             }
         }
     }
@@ -613,7 +626,7 @@ void block_ker(const int M, const int N, const int K, const float *A,
     // Process all M rows for the remaining (N-Nu) columns
     for (int j = Nu; j < N; j++) {
         float *c_ptr = &C[j * ldc];
-        const float *b_col = &B[j * ldb];  // no TransB
+        const float *b_col = isTransB ? &B[j] : &B[j * ldb];
 
         int i = 0;
         while (i < M) {
@@ -621,17 +634,17 @@ void block_ker(const int M, const int N, const int K, const float *A,
             vfloat32m4_t v_acc = __riscv_vfmv_v_f_f32m4(0.0f, vl);
 
             for (int p = 0; p < K; p++) {
-                float b_val = b_col[p];  // no TransB
+                float b_val = isTransB ? b_col[p * ldb] : b_col[p];
                 vfloat32m4_t v_a;
 
-                //if (isTransA) {  // no TransA
+                if (isTransA) {  // no TransA
                     // A(p, i:i+vl) - strided access
-                //    ptrdiff_t stride_a = lda * sizeof(float);
-                //    v_a = __riscv_vlse32_v_f32m4(&A[p + i * lda], stride_a, vl);
-                //} else {
-                // A(i:i+vl, p) - contiguous access
-                v_a = __riscv_vle32_v_f32m4(&A[i + p * lda], vl);
-                //}
+                    ptrdiff_t stride_a = lda * sizeof(float);
+                    v_a = __riscv_vlse32_v_f32m4(&A[p + i * lda], stride_a, vl);
+                } else {
+                    // A(i:i+vl, p) - contiguous access
+                    v_a = __riscv_vle32_v_f32m4(&A[i + p * lda], vl);
+                }
                 v_acc = __riscv_vfmacc_vf_f32m4(v_acc, b_val, v_a, vl);
             }
 
@@ -656,7 +669,7 @@ void block_ker(const int M, const int N, const int K, const float *A,
 
         for (int j = 0; j < Nu; j++) {
             float *c_ptr = &C[Mu + j * ldc];
-            const float *b_col = &B[j * ldb];  // no TransB
+            const float *b_col = isTransB ? &B[j] : &B[j * ldb];
 
             int i = 0;
             while (i < m_tail) {
@@ -666,15 +679,15 @@ void block_ker(const int M, const int N, const int K, const float *A,
                 for (int p = 0; p < K; p++) {
                     float b_val = b_col[p];  // no TransB
                     vfloat32m4_t v_a;
-                    //if (isTransA) { // no TransA
-                    //    // A(p, Mu+i:Mu+i+vl) - strided access
-                    //    ptrdiff_t stride_a = lda * sizeof(float);
-                    //    v_a = __riscv_vlse32_v_f32m4(
-                    //            &A[p + (Mu + i) * lda], stride_a, vl);
-                    //} else {
-                    // A(Mu+i:Mu+i+vl, p) - contiguous access
-                    v_a = __riscv_vle32_v_f32m4(&A[Mu + i + p * lda], vl);
-                    //}
+                    if (isTransA) { // no TransA
+                        // A(p, Mu+i:Mu+i+vl) - strided access
+                        ptrdiff_t stride_a = lda * sizeof(float);
+                        v_a = __riscv_vlse32_v_f32m4(
+                                &A[p + (Mu + i) * lda], stride_a, vl);
+                    } else {
+                        // A(Mu+i:Mu+i+vl, p) - contiguous access
+                        v_a = __riscv_vle32_v_f32m4(&A[Mu + i + p * lda], vl);
+                    }
                     v_acc = __riscv_vfmacc_vf_f32m4(v_acc, b_val, v_a, vl);
                 }
 
@@ -696,7 +709,7 @@ void block_ker(const int M, const int N, const int K, const float *A,
 }
 
 
-void gemm_ithr(const int M, const int N, const int K, const float alpha,
+void gemm_ithr(bool isTransA, bool isTransB, const int M, const int N, const int K, const float alpha,
         const float *A, const int lda, const float *B, const int ldb,
         const float beta, float *C, const int ldc, bool do_copy, float *ws,
         int ithr) 
@@ -733,11 +746,8 @@ void gemm_ithr(const int M, const int N, const int K, const float alpha,
             for (int Bn = 0; Bn < N; Bn += BN) {
                 int nb = MIN(N - Bn, BN);
                 
-                // isTransA == false && isTransB == false 
-                //curA = isTransA ? A + Bk + Bm * lda : A + Bm + Bk * lda;
-                //curB = isTransB ? B + Bn + Bk * ldb : B + Bk + Bn * ldb;
-                curA = A + Bm + Bk * lda;
-                curB = B + Bk + Bn * ldb;
+                curA = isTransA ? A + Bk + Bm * lda : A + Bm + Bk * lda;
+                curB = isTransB ? B + Bn + Bk * ldb : B + Bk + Bn * ldb;
                 curC = C + Bm + Bn * ldc;
 
                 // only in the first stage, pass beta otherwise pass beta=1 ...
@@ -754,18 +764,20 @@ void gemm_ithr(const int M, const int N, const int K, const float alpha,
 
                 // SO: same invocation, because alpha=1 and beta=0 ---> unique branch
 
-                if(DEBUG_KERNEL)
-                printf("BLOCK_KER(mb:%d, nb:%d, kb:%d, curA:&A[%ld], lda:%d, curB:&B[%ld], ldb:%d, curC:&C[%ld], ldc:%d, alpha:%f, beta:%f, ws, do_copy:%s, ithr:%d)\n",
+                if(DEBUG_KERNEL > 0)
+                printf("BLOCK_KER(isTransA:%s, isTransB:%s, mb:%d, nb:%d, kb:%d, curA:&A[%ld], lda:%d, curB:&B[%ld], ldb:%d, curC:&C[%ld], ldc:%d, alpha:%f, beta:%f, ws, do_copy:%s, ithr:%d)\n",
+                    isTransA ? "TRUE\0" : "FALSE\0", 
+                    isTransB ? "TRUE\0" : "FALSE\0",
                     mb, nb, kb,
                     (curA - A), lda,
                     (curB - B), ldb,
                     (curC - C), ldc,
                     alpha, beta,
-                    do_copy ? "VERO\0" : "FALSO\0",
+                    do_copy ? "TRUE\0" : "FALSE\0",
                     ithr
                 );
 
-                block_ker(mb, nb, kb, curA, lda, curB,ldb, curC, ldc, alpha, beta, ws, do_copy, ithr);
+                block_ker(isTransA, isTransB, mb, nb, kb, curA, lda, curB,ldb, curC, ldc, alpha, beta, ws, do_copy, ithr);
 
 
             }
@@ -776,6 +788,7 @@ void gemm_ithr(const int M, const int N, const int K, const float alpha,
 
 
 void multiply(
+    bool isTransA, bool isTransB,
     const float* _A,
     const float* _B,
     float* C,
@@ -785,11 +798,6 @@ void multiply(
     // Perform matrix multiplication (GEMM) with operands swapped
     const float* A = _B;
     const float* B = _A;
-
-
-    // HP: A and B non-transposed [so in row-major]
-    bool isTransA = false;
-    bool isTransB = false;
 
     // Let op(X) be such that if transx == 'N', then op(X) = X;
     // otherwise, if transx == 'T', then op(X) = X^T.
@@ -867,13 +875,13 @@ void multiply(
     }
     */
 
-    // isTransA == false && isTransB == false
-    /*
+
+    
     const float *myA = isTransA ? &(A[k_from + m_from * lda])
                                 : &(A[m_from + k_from * lda]);
     const float *myB = isTransB ? &(B[n_from + k_from * ldb])
                                 : &(B[k_from + n_from * ldb]);
-
+    /*
     if (!isTransA) {
         if (!isTransB) {
             gemm_ithr<false, false>(myM, myN, myK, alpha, myA, lda, myB,
@@ -893,26 +901,24 @@ void multiply(
     }
 
     */
-    const float *myA = &(A[m_from + k_from * lda]);
-    const float *myB = &(B[k_from + n_from * ldb]);
-
-
     
-    if(DEBUG_KERNEL)
-    printf("GEMM_ITHR(myM:%d, myN:%d, myK:%d, alpha:%f, myA:&A[%ld], lda:%d, myB:&B[%ld], ldb:%d, myBeta:%f, myC:&C[%ld], ld:%d, do_copy:%s, ws, ithr:%d )\n",
+    if(DEBUG_KERNEL > 0)
+    printf("GEMM_ITHR(isTransA:%s, isTransB:%s, myM:%d, myN:%d, myK:%d, alpha:%f, myA:&A[%ld], lda:%d, myB:&B[%ld], ldb:%d, myBeta:%f, myC:&C[%ld], ld:%d, do_copy:%s, ws, ithr:%d )\n",
+        isTransA ? "TRUE\0" : "FALSE\0", 
+        isTransB ? "TRUE\0" : "FALSE\0",        
         myM, myN, myK, 
         alpha, 
         (A - myA), lda, 
         (B - myB), ldb,
         myBeta,
         (C - myC), ld,
-        do_copy ? "VERO\0" : "FALSO\0",
+        do_copy ? "TRUE\0" : "FALSE\0",
         ithr
     );
 
-    gemm_ithr(myM, myN, myK, alpha, myA, lda, myB, ldb, myBeta, myC, ld, do_copy, ws, ithr);
+    gemm_ithr(isTransA, isTransB, myM, myN, myK, alpha, myA, lda, myB, ldb, myBeta, myC, ld, do_copy, ws, ithr);
 
-    /// GEMM_ITHR(myM:1, myN:1, myK:1, alpha:1.000000, myA:&A[0], lda:8, myB:&B[0], ldb:8, myBeta:0.000000, myC:&C[0], ld:8, do_copy:FALSO, ws:0, ithr:0 )
+    /// GEMM_ITHR(myM:1, myN:1, myK:1, alpha:1.000000, myA:&A[0], lda:8, myB:&B[0], ldb:8, myBeta:0.000000, myC:&C[0], ld:8, do_copy:FALSE, ws:0, ithr:0 )
 
 
     ///}
@@ -925,16 +931,28 @@ int main(int argc, char* argv[]) {
 
     int size = SIZE;
     int input_case = DEBUG_INPUT_FLAG;
+    bool isTransA=false, isTransB=false;
 
     if (argc == 2) {
         size = atoi( argv[1] );
     }
-    if (argc == 3){
+    if (argc == 4){
         size = atoi( argv[1] );
-        input_case = atoi( argv[2] );
+        isTransA = atoi( argv[2] ) == 1 ? true : false;
+        isTransB = atoi( argv[3] ) == 1 ? true : false;
+    }
+    if (argc == 5){
+        size = atoi( argv[1] );
+        isTransA = atoi( argv[2] ) == 1 ? true : false;
+        isTransB = atoi( argv[3] ) == 1 ? true : false;
+        input_case = atoi( argv[4] );
     }
 
     printf("size: %d x %d    input_case: %d\n", size, size, input_case );
+    printf("isTransA:%s   isTransB:%s\n", 
+        isTransA ? "TRUE\0" : "FALSE\0", 
+        isTransB ? "TRUE\0" : "FALSE\0"   
+    );
     ///printf("Num proc: %d\n", omp_get_max_threads());
     
     // Allocate memory for matrices
@@ -945,7 +963,7 @@ int main(int argc, char* argv[]) {
     // Init matrix values pseudorandom
 
     // set initial seed for rand, 1 if debug-mode
-    srand( input_case == 0 ? time(NULL) : 1 );
+    srand( RANDOM == 0 ? 1 : time(NULL)  );
 
     for(int i = 0; i < size * size; i++ ){
 
@@ -1007,7 +1025,7 @@ int main(int argc, char* argv[]) {
     clock_t start_time = clock();
 
     // Perform matrix multiplication (GEMM) -- invertito!
-    multiply(A, B, C, size);
+    multiply(isTransA, isTransB, A, B, C, size);
 
     // Stop timer
     //double end_time = omp_get_wtime();
@@ -1025,7 +1043,7 @@ int main(int argc, char* argv[]) {
     printf("Execution time: %f seconds\n", execution_time);
 
     // line to grep results in benchmark phase
-    printf("> BENCHMARK_RECORD : onednn_rvv_gemm_f32, %f, %d\n", execution_time, size);
+    printf("> BENCHMARK_RECORD : onednn_rvv_gemm_f32_v2, %f, %d\n", execution_time, size);
 
     // Free memory
     free(A);
