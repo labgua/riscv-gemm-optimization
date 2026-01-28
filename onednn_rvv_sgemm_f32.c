@@ -7,7 +7,7 @@
 #include "utils.h"
 
 /**
- * onednn_rvv_gemm_f32 WITHOUT oneDNN
+ * onednn_rvv_sgemm_f32 WITHOUT oneDNN
  * - The onednn code implements matrix multiplication following BLAS conventions,
  *   treating A and B as column-major matrices from a logical standpoint.
  * - Their kernel handles the row-major format but are logical reinterpreted
@@ -28,13 +28,13 @@
 #define DEBUG_INPUT_FLAG 0
 
 // [0, 1, 2, 3, 4]
-#define DEBUG_KERNEL 4
+#define DEBUG_KERNEL 0
 
 // [0, 1]
-#define DEBUG_PRINT_IO 1
+#define DEBUG_PRINT_IO 0
 
 // [0, 1]
-#define RANDOM 0
+#define RANDOM 1
 
 #define SIZE 2
 
@@ -127,7 +127,7 @@ void copy_A(bool isTransA, int K, const float *A, const int lda, float *ws) {
     for (int k = 0; k < K; k++) {
         int i = 0;
 
-        if (isTransA) { /// No TransA
+        if (isTransA) {
             ptrdiff_t stride = lda * sizeof(float);
             if (i < m) {
                 size_t vl0 = __riscv_vsetvl_e32m4(m - i);
@@ -233,7 +233,7 @@ static void kernel_mxn_2x2(bool isTransA, bool isTransB, int K, const float *A, 
 
         for (int k = 0; k < K; ++k) {
             vfloat32m1_t v_a;
-            if (isTransA) {  // isTransA == false
+            if (isTransA) {
                 ptrdiff_t stride_a = lda * sizeof(float);
                 v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
             } else {
@@ -281,7 +281,7 @@ static void kernel_mxn_4x4(bool isTransA, bool isTransB, int K, const float *A, 
 
         for (int k = 0; k < K; ++k) {
             vfloat32m1_t v_a;
-            if (isTransA) { // isTransA == false
+            if (isTransA) {
                 ptrdiff_t stride_a = lda * sizeof(float);
                 v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
             } else {
@@ -356,7 +356,7 @@ static void kernel_mxn_8x8(bool isTransA, bool isTransB, int K, const float *A, 
 
         for (int k = 0; k < K; ++k) {
             vfloat32m1_t v_a;
-            if (isTransA) {  // isTransA == false
+            if (isTransA) {
                 ptrdiff_t stride_a = lda * sizeof(float);
                 v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
             } else {
@@ -432,7 +432,7 @@ static void kernel_mxn_16x16(bool isTransA, bool isTransB, int K, const float *A
 
         for (int k = 0; k < K; ++k) {
             vfloat32m1_t v_a;
-            if (isTransA) {  // isTransA == false
+            if (isTransA) {
                 ptrdiff_t stride_a = lda * sizeof(float);
                 v_a = __riscv_vlse32_v_f32m1(A + i * lda + k, stride_a, vl);
             } else {
@@ -637,7 +637,7 @@ void block_ker(bool isTransA, bool isTransB, const int M, const int N, const int
                 float b_val = isTransB ? b_col[p * ldb] : b_col[p];
                 vfloat32m4_t v_a;
 
-                if (isTransA) {  // no TransA
+                if (isTransA) {
                     // A(p, i:i+vl) - strided access
                     ptrdiff_t stride_a = lda * sizeof(float);
                     v_a = __riscv_vlse32_v_f32m4(&A[p + i * lda], stride_a, vl);
@@ -677,9 +677,9 @@ void block_ker(bool isTransA, bool isTransB, const int M, const int N, const int
                 vfloat32m4_t v_acc = __riscv_vfmv_v_f_f32m4(0.0f, vl);
 
                 for (int p = 0; p < K; p++) {
-                    float b_val = b_col[p];  // no TransB
+                    float b_val = b_col[p];
                     vfloat32m4_t v_a;
-                    if (isTransA) { // no TransA
+                    if (isTransA) {
                         // A(p, Mu+i:Mu+i+vl) - strided access
                         ptrdiff_t stride_a = lda * sizeof(float);
                         v_a = __riscv_vlse32_v_f32m4(
@@ -1043,7 +1043,7 @@ int main(int argc, char* argv[]) {
     printf("Execution time: %f seconds\n", execution_time);
 
     // line to grep results in benchmark phase
-    printf("> BENCHMARK_RECORD : onednn_rvv_gemm_f32_v2, %f, %d\n", execution_time, size);
+    printf("> BENCHMARK_RECORD : onednn_rvv_sgemm_f32, %f, %d\n", execution_time, size);
 
     // Free memory
     free(A);
