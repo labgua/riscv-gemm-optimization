@@ -1043,7 +1043,7 @@ int main(int argc, char* argv[]) {
     printf("Execution time: %f seconds\n", execution_time);
 
     // line to grep results in benchmark phase
-    printf("> BENCHMARK_RECORD : onednn_rvv_sgemm_f32, %f, %d\n", execution_time, size);
+    printf("> BENCHMARK_RECORD : onednn_rvv_smatmul_f32, %f, %d\n", execution_time, size);
 
     // Free memory
     free(A);
