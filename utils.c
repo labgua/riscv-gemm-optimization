@@ -1,6 +1,7 @@
 #include "utils.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 
 void print_matrix(double* M, int size){
     printf("> Print Matrix:\n");
@@ -51,10 +52,84 @@ void print_matrixf32(float* M, int tile_size, int size, int print_inline){
 }
 
 void print_lmatrixf32(float* M, int row_size, int num_elements){
-    printf("> Print line-Matrix f32 (row_size:%d,  num_elements:%d):\n", row_size, num_elements);
+    printf("> Print Matrix f32 (row_size:%d,  num_elements:%d):\n", row_size, num_elements);
     for( int i = 0; i < num_elements; i++ ){
         printf("%.1f\t", M[i]);
         if( (i+1) % row_size == 0 ) printf("\n");
+    }
+}
+
+void init_matrix_input(int input_case, float* _A, float* _B, int M, int N, int K){
+
+    float (*A)[K] = (float (*)[K]) _A;   // M x K
+    float (*B)[N] = (float (*)[N]) _B;   // K x N
+
+    // A matrix  M x K
+    for(int i = 0; i < M; i++){
+        for(int j = 0; j<K; j++){
+            switch (input_case)
+            {
+            case IDENTITY_MATRIX:
+                if( i == j ) A[i][j] = 1.0;
+                else A[i][j] = 0.0;
+                break;
+
+            case ALL_ONES_MATRICES:
+                A[i][j] = 1.0;
+                break;
+
+            case CONST_ROWS_CONST_COLS:
+                A[i][j] = (float) (i+1);
+                break;
+
+            case ARBITRARY_MATRIX_IDENTITY:  //??
+                A[i][j] = (float) (i * K + j);
+                break;
+
+            case IDENTITY_INDEX_MATRIX:
+                if( i == j ) A[i][j] = 1.0;
+                else A[i][j] = 0.0;
+                break;
+            
+            default: //RANDOM_INTEGERS
+                A[i][j] = rand() % 10 + 1;
+                break;
+            }
+        }
+    }
+
+    // B matrix  K x N
+    for(int i = 0; i < K; i++){
+        for(int j = 0; j<N; j++){
+            switch (input_case)
+            {
+            case IDENTITY_MATRIX:
+                if( i == j ) B[i][j] = 1.0;
+                else B[i][j] = 0.0;
+                break;
+
+            case ALL_ONES_MATRICES:
+                B[i][j] = 1.0;
+                break;
+
+            case CONST_ROWS_CONST_COLS:
+                B[i][j] = (float) (j+1);
+                break;
+
+            case ARBITRARY_MATRIX_IDENTITY:  //??
+                if( i == j ) B[i][j] = 1.0;
+                else B[i][j] = 0.0;
+                break;
+
+            case IDENTITY_INDEX_MATRIX:
+                B[i][j] = (float)(i * N + j);
+                break;
+            
+            default: //RANDOM_INTEGERS
+                B[i][j] = rand() % 10 + 1;
+                break;
+            }
+        }
     }
 }
 
