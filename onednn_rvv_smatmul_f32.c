@@ -24,17 +24,17 @@
  *   necessary to swap N with M for a matrix product between generic non-square matrices.
  */
 
+#define DEBUG_ENABLED 0
+
+// [0, 1, 2, 3, 4]
+int DEBUG_LEVEL;
+
 // [0, 1]
 #define DEBUG_INPUT_FLAG 0
 
-// [0, 1, 2, 3, 4]
-#define DEBUG_KERNEL 0
 
 // [0, 1]
-#define DEBUG_PRINT_IO 0
-
-// [0, 1]
-#define RANDOM 1
+#define RANDOM 0
 
 #define SIZE 2
 
@@ -121,7 +121,7 @@ void copy_A(bool isTransA, int K, const float *A, const int lda, float *ws) {
     const int m = get_m_unroll_factor();
 
     float* ws_buffer_debug = NULL;
-    if( DEBUG_KERNEL >= 3 ) ws_buffer_debug = ws;
+    if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ) ws_buffer_debug = ws;
 
     // Two-way software pipelining: overlap load and store
     for (int k = 0; k < K; k++) {
@@ -174,7 +174,7 @@ void copy_A(bool isTransA, int K, const float *A, const int lda, float *ws) {
         }
         ws += m;
 
-        if( DEBUG_KERNEL >= 3 ) {
+        if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ) {
             printf("copy_A>: step-%d", i);
             ///print_matrixf32(ws_buffer_debug, K, lda, 0);
             print_lmatrixf32(ws_buffer_debug, get_m_unroll_factor(), K * get_m_unroll_factor());
@@ -217,7 +217,7 @@ static void kernel_mxn_2x2(bool isTransA, bool isTransB, int K, const float *A, 
         int ldb, float *C, int ldc, float alpha, float beta,
         int ithr)
 {
-    if(DEBUG_KERNEL > 0)printf("> kernel_mxn_2x2\n");
+    if(DEBUG_ENABLED && DEBUG_LEVEL > 0)printf("> kernel_mxn_2x2\n");
 
     const int m = get_m_unroll_factor();
     //const int n = 2;
@@ -260,7 +260,7 @@ static void kernel_mxn_4x4(bool isTransA, bool isTransB, int K, const float *A, 
         int ldb, float *C, int ldc, float alpha, float beta,
         int ithr)
 {
-    if(DEBUG_KERNEL > 0)printf("> kernel_mxn_4x4 isTransA:%s isTransB:%s\n",
+    if(DEBUG_ENABLED && DEBUG_LEVEL > 0)printf("> kernel_mxn_4x4 isTransA:%s isTransB:%s\n",
         isTransA ? "TRUE\0" : "FALSE\0",
         isTransB ? "TRUE\0" : "FALSE\0"
     );
@@ -291,7 +291,7 @@ static void kernel_mxn_4x4(bool isTransA, bool isTransB, int K, const float *A, 
             const float *b_ptr = isTransB ? &B[k * ldb] : &B[k];
             const int b_stride = isTransB ? 1 : ldb;
 
-            if( DEBUG_KERNEL >= 4 ){
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 4 ){
                 float tmp[4] = {0.0f, 0.0f, 0.0f, 0.0f};
                 size_t vl2 = __riscv_vsetvl_e32m1(4);
                 __riscv_vse32_v_f32m1(tmp, v_a, vl2);
@@ -314,7 +314,7 @@ static void kernel_mxn_4x4(bool isTransA, bool isTransB, int K, const float *A, 
             v_c3 = __riscv_vfmacc_vf_f32m1(
                     v_c3, b_ptr[3 * b_stride], v_a, vl);
 
-            if(DEBUG_KERNEL >= 2){
+            if(DEBUG_ENABLED && DEBUG_LEVEL >= 2){
                 printf("> vector matrix\n");
                 print_vmatrixf32_4x4(v_c0, v_c1, v_c2, v_c3);
             }
@@ -334,7 +334,7 @@ static void kernel_mxn_8x8(bool isTransA, bool isTransB, int K, const float *A, 
         int ldb, float *C, int ldc, float alpha, float beta,
         int ithr)
 {
-    if(DEBUG_KERNEL > 0)printf("> kernel_mxn_8x8\n");
+    if(DEBUG_ENABLED && DEBUG_LEVEL > 0)printf("> kernel_mxn_8x8\n");
 
     const int m = get_m_unroll_factor();
     //const int n = 8;
@@ -401,7 +401,7 @@ static void kernel_mxn_16x16(bool isTransA, bool isTransB, int K, const float *A
         int ldb, float *C, int ldc, float alpha, float beta,
         int ithr)
 {
-    if(DEBUG_KERNEL > 0)printf("> kernel_mxn_16x16\n");
+    if(DEBUG_ENABLED && DEBUG_LEVEL > 0)printf("> kernel_mxn_16x16\n");
 
     const int m = get_m_unroll_factor();
     //const int n = 16;
@@ -501,7 +501,7 @@ void kernel_mxn(bool isTransA, bool isTransB, int K, const float *A, const int l
         const int ldb, float *C, const int ldc, const float alpha,
         const float beta, int ithr) 
 {
-    if(DEBUG_KERNEL > 0) printf("> kernel_mxn: alpha:%f  beta:%f\n", alpha, beta);
+    if(DEBUG_ENABLED && DEBUG_LEVEL > 0) printf("> kernel_mxn: alpha:%f  beta:%f\n", alpha, beta);
     int n_unroll = get_n_unroll_factor();
 
     switch (n_unroll) {
@@ -539,10 +539,10 @@ void block_ker(bool isTransA, bool isTransB, const int M, const int N, const int
     int Nu = rnd_dn(N, n_unroll);
     int Mu = rnd_dn(M, m_unroll);
 
-    if(DEBUG_KERNEL > 0)
+    if(DEBUG_ENABLED && DEBUG_LEVEL > 0)
     printf("> block_ker: n_unroll:%d   m_unroll:%d        Nu:%d   Mu:%d\n",n_unroll, m_unroll, Nu, Mu);
 
-    if(DEBUG_KERNEL > 0){
+    if(DEBUG_ENABLED && DEBUG_LEVEL > 0){
         if( ws != NULL ){
             printf("Print WS matrix\n");
             //print_matrixf32(ws, K, lda, 0);
@@ -557,14 +557,14 @@ void block_ker(bool isTransA, bool isTransB, const int M, const int N, const int
     // also JIT branch disabled ...
 
     if (do_copy) {
-        if(DEBUG_KERNEL > 0)printf("branch DO_COPY=TRUE\n");
+        if(DEBUG_ENABLED && DEBUG_LEVEL > 0)printf("branch DO_COPY=TRUE\n");
         for (int i = 0; i < Mu; i += m_unroll) {
             for (int j = 0; j < Nu; j += n_unroll) {
                 const float *b = isTransB ? &B[j] : &B[j * ldb];
                 const float *a = isTransA ? &A[i * lda] : &A[i];
 
                 if (j == 0) {
-                    if(DEBUG_KERNEL > 0)
+                    if(DEBUG_ENABLED && DEBUG_LEVEL > 0)
                     printf("copy_A(isTransA:%s, K:%d, a:&A[%ld], lda:%d, ws)\n", 
                         isTransA ? "TRUE\0" : "FALSE\0",
                         K, (a - A), lda
@@ -572,14 +572,14 @@ void block_ker(bool isTransA, bool isTransB, const int M, const int N, const int
 
                     copy_A(isTransA, K, a, lda, ws); 
 
-                    if(DEBUG_KERNEL > 0){
+                    if(DEBUG_ENABLED && DEBUG_LEVEL > 0){
                         printf("Print WS matrix (after copy)\n");
                         //print_matrixf32(ws, K, lda, 0);
                         print_lmatrixf32(ws, m_unroll, m_unroll * K);
                     }
                 }  
 
-                if(DEBUG_KERNEL > 0)
+                if(DEBUG_ENABLED && DEBUG_LEVEL > 0)
                 printf("KERNEL_MXN(false, isTransB:%s, K:%d, ws, m_unroll:%d, b:&B[%ld], ldb:%d, &C[%d + %d * %d], ldc:%d, alpha:%f, beta:%f, ithr:%d)\n",
                     isTransB ? "TRUE\0" : "FALSE\0",
                     K, m_unroll,
@@ -591,7 +591,7 @@ void block_ker(bool isTransA, bool isTransB, const int M, const int N, const int
 
                 kernel_mxn(false, isTransB, K, ws, m_unroll, b, ldb, &C[i + j * ldc], ldc, alpha, beta, ithr);
                 
-                if(DEBUG_KERNEL > 0){
+                if(DEBUG_ENABLED && DEBUG_LEVEL > 0){
                     printf("Print C matrix\n");
                     //print_matrixf32(C, K, K, 0);
                     print_lmatrixf32(C, ldc, ldc * N);
@@ -599,13 +599,13 @@ void block_ker(bool isTransA, bool isTransB, const int M, const int N, const int
             }
         }
     } else {
-        if(DEBUG_KERNEL > 0)printf("branch DO_COPY=FALSE\n");
+        if(DEBUG_ENABLED && DEBUG_LEVEL > 0)printf("branch DO_COPY=FALSE\n");
         for (int i = 0; i < Mu; i += m_unroll) {
             for (int j = 0; j < Nu; j += n_unroll) {
                 const float *b = isTransB ? &B[j] : &B[j * ldb];
                 const float *a = isTransA ? &A[i * lda] : &A[i];
 
-                if(DEBUG_KERNEL > 0)
+                if(DEBUG_ENABLED && DEBUG_LEVEL > 0)
                 printf("KERNEL_MXN(isTransA:%s, isTransB:%s, K:%d, a:&A[%ld], lda:%d, b:&B[%ld], ldb:%d, &C[%d + %d * %d], ldc:%d, alpha:%f, beta:%f, ithr:%d)\n",
                     isTransA ? "TRUE\0" : "FALSE\0",
                     isTransB ? "TRUE\0" : "FALSE\0",
@@ -764,7 +764,7 @@ void gemm_ithr(bool isTransA, bool isTransB, const int M, const int N, const int
 
                 // SO: same invocation, because alpha=1 and beta=0 ---> unique branch
 
-                if(DEBUG_KERNEL > 0)
+                if(DEBUG_ENABLED && DEBUG_LEVEL > 0)
                 printf("BLOCK_KER(isTransA:%s, isTransB:%s, mb:%d, nb:%d, kb:%d, curA:&A[%ld], lda:%d, curB:&B[%ld], ldb:%d, curC:&C[%ld], ldc:%d, alpha:%f, beta:%f, ws, do_copy:%s, ithr:%d)\n",
                     isTransA ? "TRUE\0" : "FALSE\0", 
                     isTransB ? "TRUE\0" : "FALSE\0",
@@ -902,7 +902,7 @@ void multiply(
 
     */
     
-    if(DEBUG_KERNEL > 0)
+    if(DEBUG_ENABLED && DEBUG_LEVEL > 0)
     printf("GEMM_ITHR(isTransA:%s, isTransB:%s, myM:%d, myN:%d, myK:%d, alpha:%f, myA:&A[%ld], lda:%d, myB:&B[%ld], ldb:%d, myBeta:%f, myC:&C[%ld], ld:%d, do_copy:%s, ws, ithr:%d )\n",
         isTransA ? "TRUE\0" : "FALSE\0", 
         isTransB ? "TRUE\0" : "FALSE\0",        
@@ -927,28 +927,48 @@ void multiply(
 
 int main(int argc, char* argv[]) {
 
-    printf("Testing matrix ");
+    printf("Testing matrix %s\n", DEBUG_ENABLED ? "(DEBUGGER ENABLED)\0" : "\0");
 
     int size = SIZE;
     int input_case = DEBUG_INPUT_FLAG;
     bool isTransA=false, isTransB=false;
 
-    if (argc == 2) {
-        size = atoi( argv[1] );
+    int DEBUG_PRINT_IO = 0;
+
+    if( ARG("SIZE") ){
+        printf("> passing SIZE");
+        size = atoi( ARG("SIZE") );
+        printf(" %d\n", size);
     }
-    if (argc == 4){
-        size = atoi( argv[1] );
-        isTransA = atoi( argv[2] ) == 1 ? true : false;
-        isTransB = atoi( argv[3] ) == 1 ? true : false;
+    if( ARG("ISTRANSA") ){
+        printf("> passing ISTRANSA");
+        isTransA = atoi( ARG("ISTRANSA") );
+        printf(" %d\n", isTransA);
     }
-    if (argc == 5){
-        size = atoi( argv[1] );
-        isTransA = atoi( argv[2] ) == 1 ? true : false;
-        isTransB = atoi( argv[3] ) == 1 ? true : false;
-        input_case = atoi( argv[4] );
+    if( ARG("ISTRANSB") ){
+        printf("> passing ISTRANSB");
+        isTransB = atoi( ARG("ISTRANSB") );
+        printf(" %d\n", isTransB);
+    }
+    if( ARG("INPUT_CASE") ){
+        printf("> passing INPUT_CASE");
+        input_case = atoi( ARG("INPUT_CASE") );
+        printf(" %d\n", input_case);        
     }
 
-    printf("size: %d x %d    input_case: %d\n", size, size, input_case );
+    if( ARG("DEBUG_PRINT_IO") ){
+        printf("> passing DEBUG_PRINT_IO");
+        DEBUG_PRINT_IO = atoi( ARG("DEBUG_PRINT_IO") );
+        printf(" %d\n", DEBUG_PRINT_IO);        
+    }
+    if( ARG("DEBUG_LEVEL") ){
+        printf("> passing DEBUG_LEVEL");
+        DEBUG_LEVEL = atoi( ARG("DEBUG_LEVEL") );
+        printf(" %d\n", DEBUG_LEVEL);        
+    }
+
+
+    printf("size: %d x %d    input_case: %d (%s)\n", size, size, input_case, input_case_name(input_case) );
     printf("isTransA:%s   isTransB:%s\n", 
         isTransA ? "TRUE\0" : "FALSE\0", 
         isTransB ? "TRUE\0" : "FALSE\0"   
@@ -965,53 +985,7 @@ int main(int argc, char* argv[]) {
     // set initial seed for rand, 1 if debug-mode
     srand( RANDOM == 0 ? 1 : time(NULL)  );
 
-    for(int i = 0; i < size * size; i++ ){
-
-        // Identity matrix for both A and B --> C = I * I = I
-        if( input_case == 1 ){ 
-            int row = i / size;
-            int col = i % size;
-            A[i] = (row == col) ? 1.0f : 0.0f;
-            B[i] = (row == col) ? 1.0f : 0.0f;
-        }
-
-        // All-ones matrices: A = B = ones --> each element of C = sum_{k=1}^{size} 1*1 = size
-        else if( input_case == 2 ){
-            A[i] = 1.0f;
-            B[i] = 1.0f;
-        }
-
-        // A has constant rows (A[i,j] = i+1), B has constant columns (B[i,j] = j+1)
-        // Resulting C[i,j] = sum_{k=1}^{size} (i+1)*(k+1) = (i+1) * sum_{k=1}^{size}(k+1)
-        else if( input_case == 3 ){
-            int row = i / size;
-            int col = i % size;
-            A[i] = (float)(row + 1);
-            B[i] = (float)(col + 1);
-        }
-
-        // A = arbitrary matrix (filled with linear index), B = identity --> C = A * I = A
-        else if( input_case == 4 ){ // X x ID -> X
-            int row = i / size;
-            int col = i % size;
-            A[i] = i;
-            B[i] = (row == col) ? 1.0f : 0.0f;
-        }
-
-        else if( input_case == 5 ){ // ID x index -> X
-            int row = i / size;
-            int col = i % size;
-            A[i] = (row == col) ? 1.0f : 0.0f;
-            B[i] = i;
-        }
-
-        // Default: random integer matrices in [1, 10]
-        else{
-            A[i] = rand() % 10 + 1;
-            B[i] = rand() % 10 + 1;           
-        }
-        C[i] = 0.0; 
-    }
+    init_matrix_input(input_case, A, B, size, size, size);
 
     if(DEBUG_PRINT_IO){
         printf("A");
