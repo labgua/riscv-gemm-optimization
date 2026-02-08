@@ -139,6 +139,13 @@ onednn_rvv_matmul_f32: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
 	$(CC_RISCV64_EMU) -O3 -o build/qemu/onednn_rvv_matmul_f32 onednn_rvv_matmul_f32.c $(UTILS_O_QEMU) $(RISCV_OPT)
 	$(CC_RISCV64) -O3 -o build/riscv64/onednn_rvv_matmul_f32 onednn_rvv_matmul_f32.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
+rvv_smatmulop_f32_tiling_v3: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_tiling_v3 rvv_smatmulop_f32_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT)
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_tiling_v3 rvv_smatmulop_f32_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT)
+
+rvv_smatmulop_f32_reordered_tiling_v3: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_reordered_tiling_v3 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT)
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_v3 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
 ## TEST code
 
