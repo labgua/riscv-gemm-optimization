@@ -7,6 +7,9 @@
 
 #define IFDEBUG if(DEBUG_FLAG)
 
+int check_help(int argc, char *argv[]);
+#define IS_HELP check_help(argc, argv)
+
 enum InputCase {
     RANDOM_INPUT = 0,                 // Matrici con numeri interi casuali
     IDENTITY_MATRIX = 1,                // Matrice identità
@@ -15,6 +18,12 @@ enum InputCase {
     ARBITRARY_MATRIX_IDENTITY = 4,      // Matrice arbitraria moltiplicata per identità
     IDENTITY_INDEX_MATRIX = 5,          // Identità moltiplicata per indice
 };
+
+const char* input_case_name(int input_case);
+
+const char* getarg(int argc, char *argv[], const char *key);
+
+#define ARG(X) getarg(argc, argv, X)
 
 void print_matrix(double* M, int size);
 

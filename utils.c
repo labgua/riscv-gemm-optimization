@@ -2,6 +2,51 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+
+int check_help(int argc, char *argv[]) {
+
+    for (int i = 1; i < argc; i++) {
+        if (
+            strcmp(argv[i], "--help") == 0 ||
+            strcmp(argv[i], "-h") == 0 || 
+            strcmp(argv[i], "HELP") == 0
+        ) {
+            return 1;
+        }
+    }
+    return 0;
+}
+
+const char* input_case_name(int input_case) {
+    switch (input_case) {
+        case RANDOM_INPUT:    return "RANDOM_INPUT";
+        case IDENTITY_MATRIX:    return "IDENTITY_MATRIX";
+        case ALL_ONES_MATRICES:    return "ALL_ONES_MATRICES";
+        case CONST_ROWS_CONST_COLS:    return "OCONST_ROWS_CONST_COLS";
+        case ARBITRARY_MATRIX_IDENTITY:   return "ARBITRARY_MATRIX_IDENTITY";
+        case IDENTITY_INDEX_MATRIX:   return "IDENTITY_INDEX_MATRIX";
+        default:        return "INPUT_UNKNOWN";
+    }
+}
+
+const char* getarg(int argc, char *argv[], const char *key) {
+    if (!key || !*key) return NULL;
+
+    size_t key_len = strlen(key);
+
+    for (int i = 1; i < argc; i++) {  // salta argv[0] (nome programma)
+        const char *arg = argv[i];
+        
+        // Verifica se l'argomento inizia con "CHIAVE="
+        if (strncmp(arg, key, key_len) == 0 && arg[key_len] == '=') {
+            return arg + key_len + 1;  // restituisce puntatore al valore
+        }
+    }
+
+    return NULL;  // chiave non trovata
+}
+
 
 void print_matrix(double* M, int size){
     printf("> Print Matrix:\n");
