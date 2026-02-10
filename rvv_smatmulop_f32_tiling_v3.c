@@ -115,6 +115,12 @@ void kernel_2_m2(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m2(&C[ih + 0][jh], vc0, vl);
             __riscv_vse32_v_f32m2(&C[ih + 1][jh], vc1, vl);
 
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
         }
     }
 }
@@ -159,6 +165,12 @@ void kernel_2_m4(float* mat1, float* mat2, float* res, int N) {
             // store
             __riscv_vse32_v_f32m4(&C[ih + 0][jh], vc0, vl);
             __riscv_vse32_v_f32m4(&C[ih + 1][jh], vc1, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
 
         }
     }
@@ -205,10 +217,66 @@ void kernel_2_m8(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m8(&C[ih + 0][jh], vc0, vl);
             __riscv_vse32_v_f32m8(&C[ih + 1][jh], vc1, vl);
 
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
         }
     }
 }
 
+void kernel_2_mf2(float* mat1, float* mat2, float* res, int N) {
+
+    float (*A)[N] = (float (*)[N]) mat1;
+    float (*B)[N] = (float (*)[N]) mat2;
+    float (*C)[N] = (float (*)[N]) res;
+
+    const int Th = 2;
+    int Tw = __riscv_vsetvl_e32mf2(N);
+
+    //printf("Tw:%d\n", Tw);
+
+    size_t vl;
+
+    for (int jh = 0; jh < N; jh += vl) {
+        for (int ih = 0; ih < N; ih += Th) {
+
+            // Tw deciso a runtime
+            vl = __riscv_vsetvl_e32mf2(N - jh);
+
+            // accumulatori: uno per ogni riga del tile
+            vfloat32mf2_t vc0 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc1 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+
+            for (int k = 0; k < N; ++k) {
+
+                // carica B[k][jh : jh+vl]
+                vfloat32mf2_t vb =
+                    __riscv_vle32_v_f32mf2(&B[k][jh], vl);
+
+                // outer product
+                vc0 = __riscv_vfmacc_vf_f32mf2(
+                    vc0, A[ih + 0][k], vb, vl);
+
+                vc1 = __riscv_vfmacc_vf_f32mf2(
+                    vc1, A[ih + 1][k], vb, vl);
+            }
+
+            // store
+            __riscv_vse32_v_f32mf2(&C[ih + 0][jh], vc0, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 1][jh], vc1, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
+        }
+    }
+}
 
 
 
@@ -263,6 +331,12 @@ void kernel_4_m1(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m1(&C[ih + 1][jh], vc1, vl);
             __riscv_vse32_v_f32m1(&C[ih + 2][jh], vc2, vl);
             __riscv_vse32_v_f32m1(&C[ih + 3][jh], vc3, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
 
         }
     }
@@ -320,6 +394,12 @@ void kernel_4_m2(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m2(&C[ih + 2][jh], vc2, vl);
             __riscv_vse32_v_f32m2(&C[ih + 3][jh], vc3, vl);
 
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
         }
     }
 }
@@ -375,6 +455,12 @@ void kernel_4_m4(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m4(&C[ih + 1][jh], vc1, vl);
             __riscv_vse32_v_f32m4(&C[ih + 2][jh], vc2, vl);
             __riscv_vse32_v_f32m4(&C[ih + 3][jh], vc3, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
 
         }
     }
@@ -432,9 +518,78 @@ void kernel_4_m8(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m8(&C[ih + 2][jh], vc2, vl);
             __riscv_vse32_v_f32m8(&C[ih + 3][jh], vc3, vl);
 
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
         }
     }
 }
+
+void kernel_4_mf2(float* mat1, float* mat2, float* res, int N) {
+
+    float (*A)[N] = (float (*)[N]) mat1;
+    float (*B)[N] = (float (*)[N]) mat2;
+    float (*C)[N] = (float (*)[N]) res;
+
+    const int Th = 4;
+    int Tw = __riscv_vsetvl_e32mf2(N);
+
+    //printf("Tw:%d\n", Tw);
+
+    size_t vl;
+
+    for (int jh = 0; jh < N; jh += vl) {
+        for (int ih = 0; ih < N; ih += Th) {
+
+            // Tw deciso a runtime
+            ////vl = __riscv_vsetvl_e32m1(N - jh);
+            vl = __riscv_vsetvl_e32mf2(N - jh);
+
+            // accumulatori: uno per ogni riga del tile
+            vfloat32mf2_t vc0 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc1 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc2 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc3 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+
+            for (int k = 0; k < N; ++k) {
+
+                // carica B[k][jh : jh+vl]
+                vfloat32mf2_t vb =
+                    __riscv_vle32_v_f32mf2(&B[k][jh], vl);
+
+                // outer product
+                vc0 = __riscv_vfmacc_vf_f32mf2(
+                    vc0, A[ih + 0][k], vb, vl);
+
+                vc1 = __riscv_vfmacc_vf_f32mf2(
+                    vc1, A[ih + 1][k], vb, vl);
+
+                vc2 = __riscv_vfmacc_vf_f32mf2(
+                    vc2, A[ih + 2][k], vb, vl);
+
+                vc3 = __riscv_vfmacc_vf_f32mf2(
+                    vc3, A[ih + 3][k], vb, vl);
+            }
+
+            // store
+            __riscv_vse32_v_f32mf2(&C[ih + 0][jh], vc0, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 1][jh], vc1, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 2][jh], vc2, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 3][jh], vc3, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
+        }
+    }
+}
+
 
 void kernel_8_m1(float* mat1, float* mat2, float* res, int N) {
 
@@ -507,6 +662,12 @@ void kernel_8_m1(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m1(&C[ih + 5][jh], vc5, vl);
             __riscv_vse32_v_f32m1(&C[ih + 6][jh], vc6, vl);
             __riscv_vse32_v_f32m1(&C[ih + 7][jh], vc7, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
 
         }
     }
@@ -584,6 +745,12 @@ void kernel_8_m2(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m2(&C[ih + 6][jh], vc6, vl);
             __riscv_vse32_v_f32m2(&C[ih + 7][jh], vc7, vl);
 
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
         }
     }
 }
@@ -659,6 +826,12 @@ void kernel_8_m4(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m4(&C[ih + 5][jh], vc5, vl);
             __riscv_vse32_v_f32m4(&C[ih + 6][jh], vc6, vl);
             __riscv_vse32_v_f32m4(&C[ih + 7][jh], vc7, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
 
         }
     }
@@ -736,9 +909,98 @@ void kernel_8_m8(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m8(&C[ih + 6][jh], vc6, vl);
             __riscv_vse32_v_f32m8(&C[ih + 7][jh], vc7, vl);
 
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
         }
     }
 }
+
+void kernel_8_mf2(float* mat1, float* mat2, float* res, int N) {
+
+    float (*A)[N] = (float (*)[N]) mat1;
+    float (*B)[N] = (float (*)[N]) mat2;
+    float (*C)[N] = (float (*)[N]) res;
+
+    const int Th = 8;
+    int Tw = __riscv_vsetvl_e32mf2(N);
+
+    //printf("Tw:%d\n", Tw);
+
+    size_t vl;
+
+    for (int jh = 0; jh < N; jh += vl) {
+        for (int ih = 0; ih < N; ih += Th) {
+
+            // Tw deciso a runtime
+            ////vl = __riscv_vsetvl_e32m1(N - jh);
+            vl = __riscv_vsetvl_e32mf2(N - jh);
+
+            // accumulatori: uno per ogni riga del tile
+            vfloat32mf2_t vc0 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc1 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc2 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc3 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc4 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc5 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc6 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc7 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+
+            for (int k = 0; k < N; ++k) {
+
+                // carica B[k][jh : jh+vl]
+                vfloat32mf2_t vb =
+                    __riscv_vle32_v_f32mf2(&B[k][jh], vl);
+
+                // outer product
+                vc0 = __riscv_vfmacc_vf_f32mf2(
+                    vc0, A[ih + 0][k], vb, vl);
+
+                vc1 = __riscv_vfmacc_vf_f32mf2(
+                    vc1, A[ih + 1][k], vb, vl);
+
+                vc2 = __riscv_vfmacc_vf_f32mf2(
+                    vc2, A[ih + 2][k], vb, vl);
+
+                vc3 = __riscv_vfmacc_vf_f32mf2(
+                    vc3, A[ih + 3][k], vb, vl);
+
+                vc4 = __riscv_vfmacc_vf_f32mf2(
+                    vc4, A[ih + 4][k], vb, vl);
+
+                vc5 = __riscv_vfmacc_vf_f32mf2(
+                    vc5, A[ih + 5][k], vb, vl);
+
+                vc6 = __riscv_vfmacc_vf_f32mf2(
+                    vc6, A[ih + 6][k], vb, vl);
+
+                vc7 = __riscv_vfmacc_vf_f32mf2(
+                    vc7, A[ih + 7][k], vb, vl);
+            }
+
+            // store
+            __riscv_vse32_v_f32mf2(&C[ih + 0][jh], vc0, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 1][jh], vc1, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 2][jh], vc2, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 3][jh], vc3, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 4][jh], vc4, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 5][jh], vc5, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 6][jh], vc6, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 7][jh], vc7, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
+        }
+    }
+}
+
 
 void kernel_16_m1(float* mat1, float* mat2, float* res, int N) {
 
@@ -851,6 +1113,12 @@ void kernel_16_m1(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m1(&C[ih + 13][jh], vc13, vl);
             __riscv_vse32_v_f32m1(&C[ih + 14][jh], vc14, vl);
             __riscv_vse32_v_f32m1(&C[ih + 15][jh], vc15, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
 
         }
     }
@@ -968,6 +1236,12 @@ void kernel_16_m2(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m2(&C[ih + 14][jh], vc14, vl);
             __riscv_vse32_v_f32m2(&C[ih + 15][jh], vc15, vl);
 
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
         }
     }
 }
@@ -1083,6 +1357,12 @@ void kernel_16_m4(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m4(&C[ih + 13][jh], vc13, vl);
             __riscv_vse32_v_f32m4(&C[ih + 14][jh], vc14, vl);
             __riscv_vse32_v_f32m4(&C[ih + 15][jh], vc15, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
 
         }
     }
@@ -1200,35 +1480,169 @@ void kernel_16_m8(float* mat1, float* mat2, float* res, int N) {
             __riscv_vse32_v_f32m8(&C[ih + 14][jh], vc14, vl);
             __riscv_vse32_v_f32m8(&C[ih + 15][jh], vc15, vl);
 
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
         }
     }
 }
+
+void kernel_16_mf2(float* mat1, float* mat2, float* res, int N) {
+
+    float (*A)[N] = (float (*)[N]) mat1;
+    float (*B)[N] = (float (*)[N]) mat2;
+    float (*C)[N] = (float (*)[N]) res;
+
+    const int Th = 16;
+    int Tw = __riscv_vsetvl_e32mf2(N);
+
+    //printf("Tw:%d\n", Tw);
+
+    size_t vl;
+
+    for (int jh = 0; jh < N; jh += vl) {
+        for (int ih = 0; ih < N; ih += Th) {
+
+            // Tw deciso a runtime
+            ////vl = __riscv_vsetvl_e32m1(N - jh);
+            vl = __riscv_vsetvl_e32mf2(N - jh);
+
+            // accumulatori: uno per ogni riga del tile
+            vfloat32mf2_t vc0 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc1 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc2 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc3 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc4 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc5 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc6 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc7 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc8 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc9 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc10 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc11 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc12 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc13 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc14 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+            vfloat32mf2_t vc15 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
+
+            for (int k = 0; k < N; ++k) {
+
+                // carica B[k][jh : jh+vl]
+                vfloat32mf2_t vb =
+                    __riscv_vle32_v_f32mf2(&B[k][jh], vl);
+
+                // outer product
+                vc0 = __riscv_vfmacc_vf_f32mf2(
+                    vc0, A[ih + 0][k], vb, vl);
+
+                vc1 = __riscv_vfmacc_vf_f32mf2(
+                    vc1, A[ih + 1][k], vb, vl);
+
+                vc2 = __riscv_vfmacc_vf_f32mf2(
+                    vc2, A[ih + 2][k], vb, vl);
+
+                vc3 = __riscv_vfmacc_vf_f32mf2(
+                    vc3, A[ih + 3][k], vb, vl);
+
+                vc4 = __riscv_vfmacc_vf_f32mf2(
+                    vc4, A[ih + 4][k], vb, vl);
+
+                vc5 = __riscv_vfmacc_vf_f32mf2(
+                    vc5, A[ih + 5][k], vb, vl);
+
+                vc6 = __riscv_vfmacc_vf_f32mf2(
+                    vc6, A[ih + 6][k], vb, vl);
+
+                vc7 = __riscv_vfmacc_vf_f32mf2(
+                    vc7, A[ih + 7][k], vb, vl);
+
+                vc8 = __riscv_vfmacc_vf_f32mf2(
+                    vc8, A[ih + 8][k], vb, vl);
+
+                vc9 = __riscv_vfmacc_vf_f32mf2(
+                    vc9, A[ih + 9][k], vb, vl);
+
+                vc10 = __riscv_vfmacc_vf_f32mf2(
+                    vc10, A[ih + 10][k], vb, vl);
+
+                vc11 = __riscv_vfmacc_vf_f32mf2(
+                    vc11, A[ih + 11][k], vb, vl);
+
+                vc12 = __riscv_vfmacc_vf_f32mf2(
+                    vc12, A[ih + 12][k], vb, vl);
+
+                vc13 = __riscv_vfmacc_vf_f32mf2(
+                    vc13, A[ih + 13][k], vb, vl);
+
+                vc14 = __riscv_vfmacc_vf_f32mf2(
+                    vc14, A[ih + 14][k], vb, vl);
+
+                vc15 = __riscv_vfmacc_vf_f32mf2(
+                    vc15, A[ih + 15][k], vb, vl);
+            }
+
+            // store
+            __riscv_vse32_v_f32mf2(&C[ih + 0][jh], vc0, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 1][jh], vc1, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 2][jh], vc2, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 3][jh], vc3, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 4][jh], vc4, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 5][jh], vc5, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 6][jh], vc6, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 7][jh], vc7, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 8][jh], vc8, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 9][jh], vc9, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 10][jh], vc10, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 11][jh], vc11, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 12][jh], vc12, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 13][jh], vc13, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 14][jh], vc14, vl);
+            __riscv_vse32_v_f32mf2(&C[ih + 15][jh], vc15, vl);
+
+            if( DEBUG_ENABLED && DEBUG_LEVEL >= 3 ){
+                ///printf("Computation block C(%d:%d) finished! \n", ih, jh);
+                printf("> C  iter!!\n");
+                print_lmatrixf32((float*) C, N, N * N);
+            }
+
+        }
+    }
+}
+
 
 void multiply_gemm(float* A, float* B, float* C, int N, int th, int lmul) {
 
     if( DEBUG_ENABLED && DEBUG_LEVEL >= 0 ){
         printf("kernel> th=%d lmul=%d\n", th, lmul);
     }
-    
+
          if( th == 2 && lmul == 1 ) kernel_2_m1(A, B, C, N);
     else if( th == 2 && lmul == 2 ) kernel_2_m2(A, B, C, N);
     else if( th == 2 && lmul == 4 ) kernel_2_m4(A, B, C, N);
     else if( th == 2 && lmul == 8 ) kernel_2_m8(A, B, C, N);
+    else if( th == 2 && lmul == -2 ) kernel_2_mf2(A, B, C, N);
 
     else if( th == 4 && lmul == 1 ) kernel_4_m1(A, B, C, N);
     else if( th == 4 && lmul == 2 ) kernel_4_m2(A, B, C, N);
     else if( th == 4 && lmul == 4 ) kernel_4_m4(A, B, C, N);
     else if( th == 4 && lmul == 8 ) kernel_4_m8(A, B, C, N);
+    else if( th == 4 && lmul == -2 ) kernel_4_mf2(A, B, C, N);
 
     else if( th == 8 && lmul == 1 ) kernel_8_m1(A, B, C, N);
     else if( th == 8 && lmul == 2 ) kernel_8_m2(A, B, C, N);
     else if( th == 8 && lmul == 4 ) kernel_8_m4(A, B, C, N);
     else if( th == 8 && lmul == 8 ) kernel_8_m8(A, B, C, N);
+    else if( th == 8 && lmul == -2 ) kernel_8_mf2(A, B, C, N);
 
     else if( th == 16 && lmul == 1 ) kernel_16_m1(A, B, C, N);
     else if( th == 16 && lmul == 2 ) kernel_16_m2(A, B, C, N);
     else if( th == 16 && lmul == 4 ) kernel_16_m4(A, B, C, N);
     else if( th == 16 && lmul == 8 ) kernel_16_m8(A, B, C, N);
+    else if( th == 16 && lmul == -2 ) kernel_16_mf2(A, B, C, N);
+
 }
 
 int main(int argc, char* argv[]) {
@@ -1284,7 +1698,7 @@ int main(int argc, char* argv[]) {
     if( ARG("LMUL") ){
         printf("> passing LMUL");
         lmul = atoi( ARG("LMUL") );
-        printf(" %d\n", lmul);
+        printf(" %d%s\n", lmul, lmul < 0 ? " (FRACTIONAL)\0" : "\0");
     }
 
 
