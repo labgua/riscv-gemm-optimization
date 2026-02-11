@@ -157,6 +157,9 @@ test_fma_vv_sv:
 	$(CC_RISCV64_EMU) -O3 -o build/qemu/test_fma_vv_sv test/test_fma_vv_sv.c $(RISCV_OPT)
 	$(CC_RISCV64) -O3 -o build/riscv64/test_fma_vv_sv test/test_fma_vv_sv.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
+test_unrolling: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -S -o build/qemu/test_unrolling.s test/test_unrolling.c $(UTILS_O_QEMU) -DUNROLL=2 $(RISCV_OPT) -fopt-info -fopt-info-loop -fopt-info-loop-missed
+
 
 #smatmul_pfor:
 #smatmul_tiling:
