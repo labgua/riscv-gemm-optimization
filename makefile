@@ -147,6 +147,44 @@ rvv_smatmulop_f32_reordered_tiling_v3: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_
 	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_reordered_tiling_v3 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT)
 	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_v3 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT)
 
+# rvv_smatmulop_f32_tiling_v3 (UNROLLING)
+rvv_smatmulop_f32_tiling_v3_unrolling2: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_tiling_v3_unrolling2 rvv_smatmulop_f32_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT) -DUNROLL=2 -fopt-info
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_tiling_v3_unrolling2 rvv_smatmulop_f32_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=2 -fopt-info
+
+rvv_smatmulop_f32_tiling_v3_unrolling4: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_tiling_v3_unrolling4 rvv_smatmulop_f32_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT) -DUNROLL=4 -fopt-info
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_tiling_v3_unrolling4 rvv_smatmulop_f32_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=4 -fopt-info
+
+rvv_smatmulop_f32_tiling_v3_unrolling8: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_tiling_v3_unrolling8 rvv_smatmulop_f32_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT) -DUNROLL=8 -fopt-info
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_tiling_v3_unrolling8 rvv_smatmulop_f32_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=8 -fopt-info
+
+rvv_smatmulop_f32_tiling_v3_unrolling16: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_tiling_v3_unrolling16 rvv_smatmulop_f32_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT) -DUNROLL=16 -fopt-info
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_tiling_v3_unrolling16 rvv_smatmulop_f32_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=16 -fopt-info
+
+
+
+# rvv_smatmulop_f32_reordered_tiling_v3 (UNROLLING)
+rvv_smatmulop_f32_reordered_tiling_v3_unrolling2: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_reordered_tiling_v3_unrolling2 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT) -DUNROLL=2 -fopt-info
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_v3_unrolling2 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=2 -fopt-info
+
+rvv_smatmulop_f32_reordered_tiling_v3_unrolling4: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_reordered_tiling_v3_unrolling4 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT) -DUNROLL=4 -fopt-info
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_v3_unrolling4 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=4 -fopt-info
+
+rvv_smatmulop_f32_reordered_tiling_v3_unrolling8: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_reordered_tiling_v3_unrolling8 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT) -DUNROLL=8 -fopt-info
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_v3_unrolling8 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=8 -fopt-info
+
+rvv_smatmulop_f32_reordered_tiling_v3_unrolling16: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_reordered_tiling_v3_unrolling2 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT) -DUNROLL=16 -fopt-info
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_v3_unrolling2 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=16 -fopt-info
+
+
+
 ## TEST code
 
 test_onednn_copy: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)

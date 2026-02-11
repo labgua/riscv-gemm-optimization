@@ -46,6 +46,17 @@ void kernel_2_m1(float* mat1, float* mat2, float* res, int N) {
             vfloat32m1_t vc0 = __riscv_vfmv_v_f_f32m1(0.0f, vl);
             vfloat32m1_t vc1 = __riscv_vfmv_v_f_f32m1(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -97,6 +108,17 @@ void kernel_2_m2(float* mat1, float* mat2, float* res, int N) {
             vfloat32m2_t vc0 = __riscv_vfmv_v_f_f32m2(0.0f, vl);
             vfloat32m2_t vc1 = __riscv_vfmv_v_f_f32m2(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -148,6 +170,17 @@ void kernel_2_m4(float* mat1, float* mat2, float* res, int N) {
             vfloat32m4_t vc0 = __riscv_vfmv_v_f_f32m4(0.0f, vl);
             vfloat32m4_t vc1 = __riscv_vfmv_v_f_f32m4(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -199,6 +232,17 @@ void kernel_2_m8(float* mat1, float* mat2, float* res, int N) {
             vfloat32m8_t vc0 = __riscv_vfmv_v_f_f32m8(0.0f, vl);
             vfloat32m8_t vc1 = __riscv_vfmv_v_f_f32m8(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -250,6 +294,17 @@ void kernel_2_mf2(float* mat1, float* mat2, float* res, int N) {
             vfloat32mf2_t vc0 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
             vfloat32mf2_t vc1 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -306,6 +361,17 @@ void kernel_4_m1(float* mat1, float* mat2, float* res, int N) {
             vfloat32m1_t vc2 = __riscv_vfmv_v_f_f32m1(0.0f, vl);
             vfloat32m1_t vc3 = __riscv_vfmv_v_f_f32m1(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -368,6 +434,17 @@ void kernel_4_m2(float* mat1, float* mat2, float* res, int N) {
             vfloat32m2_t vc2 = __riscv_vfmv_v_f_f32m2(0.0f, vl);
             vfloat32m2_t vc3 = __riscv_vfmv_v_f_f32m2(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -430,6 +507,17 @@ void kernel_4_m4(float* mat1, float* mat2, float* res, int N) {
             vfloat32m4_t vc2 = __riscv_vfmv_v_f_f32m4(0.0f, vl);
             vfloat32m4_t vc3 = __riscv_vfmv_v_f_f32m4(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -492,6 +580,17 @@ void kernel_4_m8(float* mat1, float* mat2, float* res, int N) {
             vfloat32m8_t vc2 = __riscv_vfmv_v_f_f32m8(0.0f, vl);
             vfloat32m8_t vc3 = __riscv_vfmv_v_f_f32m8(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -554,6 +653,17 @@ void kernel_4_mf2(float* mat1, float* mat2, float* res, int N) {
             vfloat32mf2_t vc2 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
             vfloat32mf2_t vc3 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -621,6 +731,17 @@ void kernel_8_m1(float* mat1, float* mat2, float* res, int N) {
             vfloat32m1_t vc6 = __riscv_vfmv_v_f_f32m1(0.0f, vl);
             vfloat32m1_t vc7 = __riscv_vfmv_v_f_f32m1(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -703,6 +824,17 @@ void kernel_8_m2(float* mat1, float* mat2, float* res, int N) {
             vfloat32m2_t vc6 = __riscv_vfmv_v_f_f32m2(0.0f, vl);
             vfloat32m2_t vc7 = __riscv_vfmv_v_f_f32m2(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -785,6 +917,17 @@ void kernel_8_m4(float* mat1, float* mat2, float* res, int N) {
             vfloat32m4_t vc6 = __riscv_vfmv_v_f_f32m4(0.0f, vl);
             vfloat32m4_t vc7 = __riscv_vfmv_v_f_f32m4(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -867,6 +1010,17 @@ void kernel_8_m8(float* mat1, float* mat2, float* res, int N) {
             vfloat32m8_t vc6 = __riscv_vfmv_v_f_f32m8(0.0f, vl);
             vfloat32m8_t vc7 = __riscv_vfmv_v_f_f32m8(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -949,6 +1103,17 @@ void kernel_8_mf2(float* mat1, float* mat2, float* res, int N) {
             vfloat32mf2_t vc6 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
             vfloat32mf2_t vc7 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -1040,6 +1205,17 @@ void kernel_16_m1(float* mat1, float* mat2, float* res, int N) {
             vfloat32m1_t vc14 = __riscv_vfmv_v_f_f32m1(0.0f, vl);
             vfloat32m1_t vc15 = __riscv_vfmv_v_f_f32m1(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -1162,6 +1338,17 @@ void kernel_16_m2(float* mat1, float* mat2, float* res, int N) {
             vfloat32m2_t vc14 = __riscv_vfmv_v_f_f32m2(0.0f, vl);
             vfloat32m2_t vc15 = __riscv_vfmv_v_f_f32m2(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -1284,6 +1471,17 @@ void kernel_16_m4(float* mat1, float* mat2, float* res, int N) {
             vfloat32m4_t vc14 = __riscv_vfmv_v_f_f32m4(0.0f, vl);
             vfloat32m4_t vc15 = __riscv_vfmv_v_f_f32m4(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -1406,6 +1604,17 @@ void kernel_16_m8(float* mat1, float* mat2, float* res, int N) {
             vfloat32m8_t vc14 = __riscv_vfmv_v_f_f32m8(0.0f, vl);
             vfloat32m8_t vc15 = __riscv_vfmv_v_f_f32m8(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -1528,6 +1737,17 @@ void kernel_16_mf2(float* mat1, float* mat2, float* res, int N) {
             vfloat32mf2_t vc14 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
             vfloat32mf2_t vc15 = __riscv_vfmv_v_f_f32mf2(0.0f, vl);
 
+            #if UNROLL == 2
+            #pragma GCC unroll 2
+            #elif UNROLL == 4
+            #pragma GCC unroll 4
+            #elif UNROLL == 8
+            #pragma GCC unroll 8
+            #elif UNROLL == 16
+            #pragma GCC unroll 16
+            #else
+            #pragma GCC unroll 1
+            #endif
             for (int k = 0; k < N; ++k) {
 
                 // carica B[k][jh : jh+vl]
@@ -1661,9 +1881,9 @@ int main(int argc, char* argv[]) {
         printf("options:\n");
         printf("> DEBUG_PRINT_IO\n> DEBUG_LEVEL\n> SIZE\n> KERNEL\n> INPUT_CASE\n> LMUL\n\n");
         printf("default values:\n");
-        printf("> size: %d x %d \n> kernel_size:%d lmul:%d %s\n> input_case:%d (%s)\n", 
+        printf("> size: %d x %d \n> kernel_size:%d lmul:%d \n> input_case:%d (%s)\n", 
             size, size, 
-            kernel_size, kernel_size==0 ? "AUTO\0" : "",
+            kernel_size,
             lmul,
             input_case, input_case_name(input_case)
         );
@@ -1757,8 +1977,12 @@ int main(int argc, char* argv[]) {
 
     printf("Execution time: %f seconds\n", execution_time);
 
+    #ifndef UNROLL
+    #define UNROLL 1
+    #endif
+
     // line to grep results in benchmark phase
-    printf("> BENCHMARK_RECORD : rvv_smatmulop_f32_tiling_v3, %f, %d, %d, %d\n", execution_time, size, kernel_size, lmul);
+    printf("> BENCHMARK_RECORD : rvv_smatmulop_f32_tiling_v3, %f, %d, %d, %d, %d\n", execution_time, size, kernel_size, lmul, UNROLL);
 
     // Free memory
     free(A);
