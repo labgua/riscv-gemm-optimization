@@ -52,7 +52,7 @@ void kernel_2_m1(float* mat1, float* mat2, float* res, int N) {
     const int Th = 2;
     int Tw = __riscv_vsetvl_e32m1(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -126,7 +126,7 @@ void kernel_2_m2(float* mat1, float* mat2, float* res, int N) {
     const int Th = 2;
     int Tw = __riscv_vsetvl_e32m2(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -200,7 +200,7 @@ void kernel_2_m4(float* mat1, float* mat2, float* res, int N) {
     const int Th = 2;
     int Tw = __riscv_vsetvl_e32m4(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -274,7 +274,7 @@ void kernel_2_m8(float* mat1, float* mat2, float* res, int N) {
     const int Th = 2;
     int Tw = __riscv_vsetvl_e32m8(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -348,7 +348,7 @@ void kernel_2_mf2(float* mat1, float* mat2, float* res, int N) {
     const int Th = 2;
     int Tw = __riscv_vsetvl_e32mf2(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -424,7 +424,7 @@ void kernel_4_m1(float* mat1, float* mat2, float* res, int N) {
     const int Th = 4;
     int Tw = __riscv_vsetvl_e32m1(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -509,7 +509,7 @@ void kernel_4_m2(float* mat1, float* mat2, float* res, int N) {
     const int Th = 4;
     int Tw = __riscv_vsetvl_e32m2(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -594,7 +594,7 @@ void kernel_4_m4(float* mat1, float* mat2, float* res, int N) {
     const int Th = 4;
     int Tw = __riscv_vsetvl_e32m4(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -678,7 +678,7 @@ void kernel_4_m8(float* mat1, float* mat2, float* res, int N) {
     const int Th = 4;
     int Tw = __riscv_vsetvl_e32m8(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -763,7 +763,7 @@ void kernel_4_mf2(float* mat1, float* mat2, float* res, int N) {
     const int Th = 4;
     int Tw = __riscv_vsetvl_e32mf2(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -849,7 +849,7 @@ void kernel_8_m1(float* mat1, float* mat2, float* res, int N) {
     const int Th = 8;
     int Tw = __riscv_vsetvl_e32m1(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -954,7 +954,7 @@ void kernel_8_m2(float* mat1, float* mat2, float* res, int N) {
     const int Th = 8;
     int Tw = __riscv_vsetvl_e32m2(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -1059,7 +1059,7 @@ void kernel_8_m4(float* mat1, float* mat2, float* res, int N) {
     const int Th = 8;
     int Tw = __riscv_vsetvl_e32m4(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -1164,7 +1164,7 @@ void kernel_8_m8(float* mat1, float* mat2, float* res, int N) {
     const int Th = 8;
     int Tw = __riscv_vsetvl_e32m8(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -1269,7 +1269,7 @@ void kernel_8_mf2(float* mat1, float* mat2, float* res, int N) {
     const int Th = 8;
     int Tw = __riscv_vsetvl_e32mf2(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -1375,7 +1375,7 @@ void kernel_16_m1(float* mat1, float* mat2, float* res, int N) {
     const int Th = 16;
     int Tw = __riscv_vsetvl_e32m1(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -1520,7 +1520,7 @@ void kernel_16_m2(float* mat1, float* mat2, float* res, int N) {
     const int Th = 16;
     int Tw = __riscv_vsetvl_e32m2(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -1665,7 +1665,7 @@ void kernel_16_m4(float* mat1, float* mat2, float* res, int N) {
     const int Th = 16;
     int Tw = __riscv_vsetvl_e32m4(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -1810,7 +1810,7 @@ void kernel_16_m8(float* mat1, float* mat2, float* res, int N) {
     const int Th = 16;
     int Tw = __riscv_vsetvl_e32m8(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);
@@ -1955,7 +1955,7 @@ void kernel_16_mf2(float* mat1, float* mat2, float* res, int N) {
     const int Th = 16;
     int Tw = __riscv_vsetvl_e32mf2(N);
 
-    printf("Tw:%d\n", Tw);
+    //printf("Tw:%d\n", Tw);
     
     // ordered B: size x 2
     float* oB = malloc(sizeof(float) * N * Tw);

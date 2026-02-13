@@ -180,8 +180,8 @@ rvv_smatmulop_f32_reordered_tiling_v3_unrolling8: $(UTILS_O_X86) $(UTILS_O_QEMU)
 	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_v3_unrolling8 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=8 -fopt-info
 
 rvv_smatmulop_f32_reordered_tiling_v3_unrolling16: $(UTILS_O_X86) $(UTILS_O_QEMU) $(UTILS_O_RISCV)
-	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_reordered_tiling_v3_unrolling2 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT) -DUNROLL=16 -fopt-info
-	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_v3_unrolling2 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=16 -fopt-info
+	$(CC_RISCV64_EMU) -O3 -o build/qemu/rvv_smatmulop_f32_reordered_tiling_v3_unrolling16 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_QEMU) $(RISCV_OPT) -DUNROLL=16 -fopt-info
+	$(CC_RISCV64) -O3 -o build/riscv64/rvv_smatmulop_f32_reordered_tiling_v3_unrolling16 rvv_smatmulop_f32_reordered_tiling_v3.c $(UTILS_O_RISCV) $(RISCV_OPT) -DUNROLL=16 -fopt-info
 
 
 
